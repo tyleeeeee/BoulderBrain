@@ -10,7 +10,7 @@ def home():
 
 @app.route('/api/data')
 def data():
-    return jsonify({"message": "Ben hacked the back end!"})
+    return jsonify({"message": "Ty hacked the back end!"})
 
 if __name__ == '__main__':
     app.run(debug=True)
