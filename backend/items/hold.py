@@ -1,7 +1,11 @@
-#def getValidHolds(image):
-# 1. Call SAM to extract segments
-# 2. Label segments as "hold" or "not hold".
-#    Option 2a: Train a classifier model (finding data could be hard)
-#    Option 2b: Use a formula to determine if a segment is a hold
-# 3. For each hold, create a hold object with its location, shape, and color.
-# 4. Return the set of holds.
+class Hold:
+    def __init__(self, id, wall, location, color, end, yMax):
+        self.id = id
+        self.wall = wall #this way we enforce a wall object to be connected to a hold
+        self.location = location  # should be a 2D array
+        self.color = color
+        self.end = end
+        self.yMax = yMax
+
+
+
