@@ -10,23 +10,53 @@ class Climber:
     self.torsoWidth = torsoWidth
     self.level = level
 
-  def getClimber(self):
-    return self
+  # Getter and setter for height
+  def get_height(self):
+    return self.height
 
-  def setHeight(self, newHeight):
-    self.height = newHeight
+  def set_height(self, value):
+    self.height = value
+
+  # Getter and setter for upper arm length
+  def get_upper_arm_length(self):
+    return self.upper_arm_length
+
+  def set_upper_arm_length(self, value):
+    self.upper_arm_length = value
+
+  # Getter and setter for forearm length
+  def get_forearm_length(self):
+    return self.forearm_length
+
+  def set_forearm_length(self, value):
+    self.forearm_length = value
+
+  # Getter and setter for leg length
+  def get_leg_length(self):
+    return self.leg_length
+
+  def set_leg_length(self, value):
+    self.leg_length = value
+
+  # Getter and setter for torso height
+  def get_torso_height(self):
+    return self.torso_height
+
+  def set_torso_height(self, value):
+    self.torso_height = value
+
+  # Getter and setter for torso width
+  def get_torso_width(self):
+    return self.torso_width
+
+  def set_torso_width(self, value):
+    self.torso_width = value
+
+  # Getter and setter for level
+  def get_level(self):
+    return self.level
+
+  def set_level(self, value):
+    self.level = value
 
 
-
-#def getValidMovesFromPosition(human pose coordinates, valid holds):
-  # 1. Check if pose is at the top of the wall, if so, then return none (the route is complete).
-  # 2. For each limb:
-  #      2.1: Calculate reachable region using limb length and other constraints.
-  #      2.2: Find all valid holds within that region.
-  # 3. Return the set of valid moves. (Each move is defined by a limb and a hold).
-
-
-#def getPositionFromMove(human pose coordinates, limb, hold):
-  # 1. Update the limb coordinates in the human pose coordinates, using the new limb and new hold.
-  # 2. Update the torso coordinates by calling getTorsoFromLimbs.
-  # 3. Return the new human pose coordinates.
