@@ -12,3 +12,7 @@
   #      2.2: Find all valid holds within that region.
   # 3. Return the set of valid moves. (Each move is defined by a limb and a hold).
 
+#def getPositionFromMove(human pose coordinates, limb, hold):
+  # 1. Update the limb coordinates in the human pose coordinates, using the new limb and new hold.
+  # 2. Update the torso coordinates by calling getTorsoFromLimbs.
+  # 3. Return the new human pose coordinates.
