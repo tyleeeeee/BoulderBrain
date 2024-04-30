@@ -1,7 +1,11 @@
 import numpy as np
 from scipy.spatial.distance import cdist
 from scipy.optimize import LinearConstraint
-from backend.items.climber import Climber
+from items.climber import Climber
+from items.hold import Hold
+from items.position import Position
+from items.route import Route
+from items.wall import Wall
 
 #def getTorsoFromLimbs(hand/feet positions):
   # 1. Call CIMI4D to estimate body position.
@@ -35,7 +39,8 @@ def getPositionFromMove(currPosition, climber, newHold, limbToMove):
     totalSqDist += cdist(rightFoot, rightHip) ** 2
     return totalSqDist
   
-
+newWall = Wall(1, 450, 450)
+newClimber = Climber(1, newWall)
 
   
   # 1. Update the limb coordinates in the human pose coordinates, using the new limb and new hold.
