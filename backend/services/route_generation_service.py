@@ -1,3 +1,9 @@
+from items.climber import Climber
+from items.hold import Hold
+from items.position import Position
+from items.route import Route
+from items.wall import Wall
+
 #def generateRoutes(initial position, valid holds):
   # 1. Start with an initial position (feet on ground) and an empty queue of states/positions.
   # 2. Add the initial position to the queue.
