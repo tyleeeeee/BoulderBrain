@@ -1,4 +1,10 @@
 
+from items.climber import Climber
+from items.hold import Hold
+from items.position import Position
+from items.route import Route
+from items.wall import Wall
+
 #def getBodyFromImage(image):
   # 1. Call Mediapipe to extract pose.
 
