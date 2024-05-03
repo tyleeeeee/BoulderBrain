@@ -4,7 +4,7 @@ from items.position import Position
 from items.route import Route
 from items.wall import Wall
 
-#def generateRoutes(initial position, valid holds):
+def generateRoutes(wall):
   # 1. Start with an initial position (feet on ground) and an empty queue of states/positions.
   # 2. Add the initial position to the queue.
   # 3. For each position in the queue:
@@ -13,3 +13,4 @@ from items.wall import Wall
   #     3.2: validMoves = getValidMovesFromPosition(current position, valid holds).
   #     3.3: For every move in validMoves, add getPositionFromMove(move) to queue.
   #     3.4: Pop from queue.
+

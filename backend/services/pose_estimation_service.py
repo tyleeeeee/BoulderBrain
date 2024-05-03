@@ -8,13 +8,6 @@ from items.position import Position
 from items.route import Route
 from items.wall import Wall
 
-#def getValidMovesFromPosition(human pose coordinates, valid holds):
-  # 1. Check if pose is at the top of the wall, if so, then return none (the route is complete).
-  # 2. For each limb:
-  #      2.1: Calculate reachable region using limb length and other constraints.
-  #      2.2: Find all valid holds within that region.
-  # 3. Return the set of valid moves. (Each move is defined by a limb and a hold).
-
 def getPositionFromMove(oldPosition, climber, newHold, limbToMove):
 
   currPosition = oldPosition
@@ -29,7 +22,7 @@ def getPositionFromMove(oldPosition, climber, newHold, limbToMove):
     case "rightFoot":
       currPosition.right_foot = [newHold.yMax[0], newHold.yMax[1]]
   
-  # Vectorize position for optimization function. By index, the values are:
+  # Vectorize position for optimization function (accepts 1D array). By index, the values are:
   # x[0]: Left hand x-coordinate
   # x[1]: Left shoulder x-coordinate
   # x[2]: Right hand x-coordinate
