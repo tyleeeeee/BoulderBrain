@@ -8,10 +8,6 @@ from items.position import Position
 from items.route import Route
 from items.wall import Wall
 
-#def getTorsoFromLimbs(hand/feet positions):
-  # 1. Call CIMI4D to estimate body position.
-  # 2. Return set of torso location points.
-
 #def getValidMovesFromPosition(human pose coordinates, valid holds):
   # 1. Check if pose is at the top of the wall, if so, then return none (the route is complete).
   # 2. For each limb:
