@@ -57,6 +57,12 @@ def generateRoutesRecursive(climber, wall, position):
   # Max depth of the tree is 10 moves.
   if position.timestep >= 10: return []
 
+  # If any hand (or foot) is within 10% of the height of the wall from the top, then declare the
+  # route finished.
+
+  if max(position.left_hand[1], position.right_hand[1], position.left_foot[1], position.right_foot[1]) >= wall.height * 0.9:
+    return []
+  
   #Array to be returned.
   finalPositions = []
 
