@@ -2,11 +2,11 @@ import numpy as np
 from scipy.spatial import distance
 from scipy.optimize import minimize
 from math import sqrt
-from services.items.climber import Climber
-from services.items.hold import Hold
-from services.items.position import Position
-from services.items.route import Route
-from services.items.wall import Wall
+from .climber import Climber
+from .hold import Hold
+from .position import Position
+from .route import Route
+from .wall import Wall
 
 
 def getPositionFromMove(oldPosition, climber, newHold, limbToMove):
