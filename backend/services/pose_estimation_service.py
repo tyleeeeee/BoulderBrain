@@ -2,11 +2,11 @@ import numpy as np
 from scipy.spatial import distance
 from scipy.optimize import minimize
 from math import sqrt
-from items.climber import Climber
-from items.hold import Hold
-from items.position import Position
-from items.route import Route
-from items.wall import Wall
+from services.items.climber import Climber
+from services.items.hold import Hold
+from services.items.position import Position
+from services.items.route import Route
+from services.items.wall import Wall
 
 
 def getPositionFromMove(oldPosition, climber, newHold, limbToMove):
@@ -194,7 +194,7 @@ newClimber = Climber(1, newWall)
 newPosition = Position(1, newClimber, 0, 1, [0, 0, 0, 0], [170.0, 170.0], [0.0, 0.0], [200.0, 140.0], [200.0, 70.0],
                        [0.0, 0.0], [200.0, 0.0], [275.0, 170.0], [0.0, 0.0], [245.0, 140.0], [245.0, 70.0], [0.0, 0.0],
                        [245.0, 0.0])
-newHold = Hold(1, newWall, [0.0, 0.0], "blue", False, [185.0, 155.0])
+newHold = Hold(newWall, [0.0, 0.0], "blue", False, [185.0, 155.0])
 
 updatedPosition = getPositionFromMove(newPosition, newClimber, newHold, "leftHand")
 
