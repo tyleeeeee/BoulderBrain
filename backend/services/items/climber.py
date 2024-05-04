@@ -1,5 +1,5 @@
 class Climber:
-  def __init__(self, id, wall, height=165, upper_arm_length=35, forearm_length=25, upper_leg_length=35, lower_leg_length=35, torso_height=70, torso_width=45, level=-1):
+  def __init__(self, wall, height=165, upper_arm_length=35, forearm_length=25, upper_leg_length=35, lower_leg_length=35, torso_height=70, torso_width=45, level=-1):
     self.id = id
     self.wall = wall
     

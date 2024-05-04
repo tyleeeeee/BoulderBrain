@@ -1,9 +1,8 @@
 class Position:
-    def __init__(self, id, climber, timestamp = 0, parent_position_id = None, holds = [0, 0, 0, 0], left_hand = [0.0, 0.0], left_elbow = [0.0, 0.0], left_shoulder = [0.0, 0.0], left_hip = [0.0, 0.0], left_knee = [0.0, 0.0], left_foot = [0.0, 0.0], right_hand = [0.0, 0.0], right_elbow = [0.0, 0.0], right_shoulder = [0.0, 0.0], right_hip = [0.0, 0.0], right_knee = [0.0, 0.0], right_foot = [0.0, 0.0], reachable_holds_left_hand = [], reachable_holds_right_hand = [], reachable_holds_left_foot = [], reachable_holds_right_foot = [], reachable_positions = [], start = False, end = False):
-        self.id = id
-        self.timestamp = timestamp  # depth in search tree
+    def __init__(self, climber, timestep = 0, parent_position = None, holds = [None, None, None, None], left_hand = [0.0, 0.0], left_elbow = [0.0, 0.0], left_shoulder = [0.0, 0.0], left_hip = [0.0, 0.0], left_knee = [0.0, 0.0], left_foot = [0.0, 0.0], right_hand = [0.0, 0.0], right_elbow = [0.0, 0.0], right_shoulder = [0.0, 0.0], right_hip = [0.0, 0.0], right_knee = [0.0, 0.0], right_foot = [0.0, 0.0], reachable_holds_left_hand = [], reachable_holds_right_hand = [], reachable_holds_left_foot = [], reachable_holds_right_foot = [], reachable_positions = [], start = False, end = False):
+        self.timestep = timestep  # depth in search tree
         self.climber_id = climber
-        self.parent_position_id = parent_position_id  # to trace back path
+        self.parent_position = parent_position  # to trace back path
         self.holds = holds  # set of 4 IDs (hands and feet)
         self.reachable_holds_left_hand = reachable_holds_left_hand  # set of hold IDs
         self.reachable_holds_right_hand = reachable_holds_right_hand  # set of hold IDs
