@@ -1,13 +1,9 @@
-from items.climber import Climber
-from items.hold import Hold
-from items.position import Position
-from items.route import Route
-from items.wall import Wall
-from pose_estimation_service import getPositionFromMove
+from services.items.position import Position
+from services.pose_estimation_service import getPositionFromMove
 
 
 def generateRoutes(wall, climber):
-    # 1. Start with an initial position (feet on ground) and an empty queue of states/positions.
+    # 1. Start with an initial position (feet on ground) and an empty queue of states/positions. #TODO: can this be deleted here? Queues ar enot implemenetd here
     # 2. Add the initial position to the queue.
     # 3. For each position in the queue:
     #     3.1: If the position is a terminal position (at the top of the wall), print the route.
@@ -53,6 +49,7 @@ def generateRoutes(wall, climber):
 
         startPoint += 0.8 * armSpan
 
+    return finalPositions
 
 def generateRoutesRecursive(climber, wall, position):
     position.timestep += 1
@@ -101,5 +98,5 @@ def generateRoutesRecursive(climber, wall, position):
     return finalPositions
 
 
-def getReachableHolds(climber, wall, position, limb):
-    return None
+
+
