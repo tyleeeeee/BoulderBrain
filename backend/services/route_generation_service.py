@@ -4,7 +4,7 @@ from .pose_estimation_service import getPositionFromMove
 # need to define inital position of limbs to calculate distance in reachable area. Setting them to  [-1, -1] means they start at an undefined position on the wall
 def initializePosition(climber, startPoint, wall):
     initialPosition = Position(climber)
-    baseHeight = climber.lower_leg_length  # TODO discuss assumption that climber start with feet at this height
+    baseHeight = climber.lower_leg_length + 10 # TODO discuss assumption that climber start with feet at this height
 
     # Set initial limb positions
     initialPosition.left_foot = [startPoint, baseHeight]
@@ -13,6 +13,27 @@ def initializePosition(climber, startPoint, wall):
     initialPosition.right_hand = [startPoint + climber.torso_width, baseHeight + climber.upper_leg_length + climber.torso_height]
 
     return initialPosition
+
+#Function which gives us strategic choice of which move to make as next one
+def selectNextMove(climber, wall, current_position):
+    best_moves = []
+    for limb in ['left_hand', 'right_hand', 'left_foot', 'right_foot']:
+        reachable_holds = getReachableHolds(climber, wall, current_position, limb)
+        for hold in reachable_holds:
+            newPosition = getPositionFromMove(current_position, climber, hold, limb)
+            if newPosition:
+                # get vertical gain for each move
+                vertical_gain = newPosition.__dict__[limb][1] - current_position.__dict__[limb][1]
+                best_moves.append((newPosition, vertical_gain))
+
+    # Now: choose move that gives highest vertical position
+    best_moves.sort(key=lambda x: x[1], reverse=True)
+
+    if best_moves:
+        return best_moves[0][0]
+    else:
+        print("Attention: No best move could be selected.")
+        return None
 
 
 def generateRoutes(wall, climber):
@@ -67,9 +88,9 @@ def generateRoutes(wall, climber):
 
 def generateRoutesRecursive(climber, wall, position):
     position.timestep += 1
-    # Max depth of the tree is 10 moves.
-    if position.timestep >= 10:
-        print("Max depth of the tree is 10 moves ")
+    # Max depth of the tree is 20 moves.
+    if position.timestep >= 20:
+        print("Max depth of the tree is 20 moves ")
         return []
 
     # If any hand (or foot) is within 10% of the height of the wall from the top, then declare the
@@ -83,33 +104,30 @@ def generateRoutesRecursive(climber, wall, position):
     # Array to be returned.
     finalPositions = []
 
-    # If any hand or foot is not yet placed on the wall, then prioritize moving those hands and feet.
+    # If limbs are not placed, find moves for them.
     if min(position.left_hand[0], position.right_hand[0], position.left_foot[0], position.right_foot[0]) < 0:
-
-        for limb in ['left_hand', 'right_hand', 'left_foot', 'right_foot']:
-            if getattr(position, limb)[0] < 0:
-                first = 0
-                for hold in getReachableHolds(climber, wall, position, limb):
-                    newPosition = getPositionFromMove(position, climber, hold, limb)
-                    # To control how the tree is pruned, adjust the if statement below.
-                    # For now, I'm pruning the tree by only selecting one move per limb
-                    # to explore, reducing the branching factor to 4.
-                    if (first == 0):
-                        finalPositions.append(generateRoutesRecursive(climber, wall, newPosition))
-                        first += 1
-
-    # If all four hands and feet are already on the wall, then explore all moves.
+        next_position = selectNextMove(climber, wall, position)
+        if next_position:
+            finalPositions += generateRoutesRecursive(climber, wall, next_position)
+        else:
+            print("Alert: No best move could be selected based on the current criteria.")
     else:
+        # Explore all moves for already placed limbs.
+        move_found = False
         for limb in ['left_hand', 'right_hand', 'left_foot', 'right_foot']:
             for hold in getReachableHolds(climber, wall, position, limb):
-                first = 0
                 newPosition = getPositionFromMove(position, climber, hold, limb)
-                # To control how the tree is pruned, adjust the if statement below.
-                # For now, I'm pruning the tree by only selecting one move per limb
-                # to explore, reducing the branching factor to 4.
-                if (first == 0):
-                    finalPositions.append(generateRoutesRecursive(climber, wall, newPosition))
-                    first += 1
+                if newPosition:
+                    finalPositions += generateRoutesRecursive(climber, wall, newPosition)
+                    move_found = True
+                    break  # for now: we break after first successful move to reduce complexity
+            if move_found:
+                break
+
+    # handle case when no moves are possible
+    if not finalPositions:
+        print("No further moves possible from this position.")
+
     return finalPositions
 
 
