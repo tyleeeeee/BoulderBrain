@@ -30,13 +30,36 @@ def get_holds_from_image():
 
     dummy_wall = Wall(id=1, height=400, width=500)
     return [
-        Hold(dummy_wall, [1, 1], "blue1", False, [1, 1.5]),  # Near the bottom-left
-        Hold(dummy_wall, [2, 1], "green1", False, [2, 1.5]),  # Near the bottom-center
-        Hold(dummy_wall, [3, 1], "red1", False, [3, 1.5]),  # Near the bottom-right
-        Hold(dummy_wall, [1, 3], "blue2", False, [1, 3.5]),  # Mid-left
-        Hold(dummy_wall, [2, 3], "yellow1", False, [2, 3.5]),  # Mid-center
-        Hold(dummy_wall, [3, 3], "green2", False, [3, 3.5]),  # Mid-right
-        Hold(dummy_wall, [1, 5], "red2", True, [1, 5.5]),  # Top-left
-        Hold(dummy_wall, [2, 5], "blue3", True, [2, 5.5]),  # Top-center
-        Hold(dummy_wall, [3, 5], "yellow2", True, [3, 5.5])  # Top-right
+        Hold(dummy_wall, [50, 100], "blue1", False, [50, 105]),  # Lower left
+        Hold(dummy_wall, [150, 120], "green1", False, [150, 125]),  # Mid left
+        Hold(dummy_wall, [250, 150], "yellow1", False, [250, 155]),  # Center wall
+        Hold(dummy_wall, [350, 180], "green2", False, [350, 185]),  # Mid right
+        Hold(dummy_wall, [450, 210], "red1", False, [450, 215]),  # Lower right
+        Hold(dummy_wall, [100, 220], "blue2", False, [100, 225]),  # Mid upper left
+        Hold(dummy_wall, [200, 250], "red2", True, [200, 255]),  # Upper center
+        Hold(dummy_wall, [300, 280], "yellow2", True, [300, 285]),  # Mid upper right
+        Hold(dummy_wall, [400, 310], "red3", True, [400, 315]),  # Upper right
+        Hold(dummy_wall, [50, 340], "blue3", True, [50, 345]),  # Top left
+        Hold(dummy_wall, [150, 370], "green3", True, [150, 375]),  # Top mid left
+        Hold(dummy_wall, [250, 400], "yellow3", True, [250, 405]),  # Top center
     ]
+
+def generate_dense_holds(wall):
+    holds = []
+    max_reach = 70  # climber's max reach for simplicity
+    vertical_spacing = max_reach * 0.9
+    horizontal_spacing = max_reach * 0.8
+
+    # Calculate how many holds can fit based on spacing and wall dimensions.
+    num_vertical = int(wall.height / vertical_spacing)
+    num_horizontal = int(wall.width / horizontal_spacing)
+
+    # Generate holds in a grid-like pattern.
+    for v in range(num_vertical):
+        for h in range(num_horizontal):
+            x = h * horizontal_spacing + (vertical_spacing / 2 if v % 2 == 1 else 0)
+            y = v * vertical_spacing
+            if x <= wall.width and y <= wall.height:
+                holds.append(Hold(wall, [x, y], "green", False, [x, y + 5]))
+
+    return holds
