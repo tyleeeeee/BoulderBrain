@@ -1,6 +1,19 @@
 from .position import Position
 from .pose_estimation_service import getPositionFromMove
 
+# need to define inital position of limbs to calculate distance in reachable area. Setting them to  [-1, -1] means they start at an undefined position on the wall
+def initializePosition(climber, startPoint, wall):
+    initialPosition = Position(climber)
+    baseHeight = climber.lower_leg_length  # TODO discuss assumption that climber start with feet at this height
+
+    # Set initial limb positions
+    initialPosition.left_foot = [startPoint, baseHeight]
+    initialPosition.right_foot = [startPoint + climber.torso_width, baseHeight]
+    initialPosition.left_hand = [startPoint, baseHeight + climber.upper_leg_length + climber.torso_height]
+    initialPosition.right_hand = [startPoint + climber.torso_width, baseHeight + climber.upper_leg_length + climber.torso_height]
+
+    return initialPosition
+
 
 def generateRoutes(wall, climber):
     # 1. Start with an initial position (feet on ground) and an empty queue of states/positions. #TODO: can this be deleted here? Queues ar enot implemenetd here
@@ -27,35 +40,33 @@ def generateRoutes(wall, climber):
 
     while startPoint < wall.width:
         # The starting point for
-        initialPosition = Position(climber)
-        print("entry while loop")
+        initialPosition =  initializePosition(climber, startPoint, wall)
+        print("entry while loop with starting point: ", startPoint)
         initialPosition.timestep = 0
 
         # Most important for the initial position is the location of the torso, which defines the reachable holds.
         # Hands and feet have negative values to represent that they begin "nowhere" on the wall.
 
-        initialPosition.left_hip = [startPoint - climber.torso_width / 2,
-                                    climber.lower_leg_length + climber.upper_leg_length]
-        initialPosition.right_hip = [startPoint + climber.torso_width / 2,
-                                     climber.lower_leg_length + climber.upper_leg_length]
-        initialPosition.left_shoulder = [startPoint - climber.torso_width / 2,
-                                         climber.lower_leg_length + climber.upper_leg_length + climber.torso_height]
-        initialPosition.right_shoulder = [startPoint + climber.torso_width / 2,
-                                          climber.lower_leg_length + climber.upper_leg_length + climber.torso_height]
-        initialPosition.left_hand, initialPosition.right_hand = [-1, -1], [-1, -1]
-        initialPosition.left_foot, initialPosition.right_foot = [-1, -1], [-1, -1]
+        # initialPosition.left_hip = [startPoint - climber.torso_width / 2,
+        #                             climber.lower_leg_length + climber.upper_leg_length]
+        # initialPosition.right_hip = [startPoint + climber.torso_width / 2,
+        #                              climber.lower_leg_length + climber.upper_leg_length]
+        # initialPosition.left_shoulder = [startPoint - climber.torso_width / 2,
+        #                                  climber.lower_leg_length + climber.upper_leg_length + climber.torso_height]
+        # initialPosition.right_shoulder = [startPoint + climber.torso_width / 2,
+        #                                   climber.lower_leg_length + climber.upper_leg_length + climber.torso_height]
+        # initialPosition.left_hand, initialPosition.right_hand = [-1, -1], [-1, -1]
+        # initialPosition.left_foot, initialPosition.right_foot = [-1, -1], [-1, -1]
 
         # Explore the full tree of generated routes with generateRoutesRecursive, and append it to the results.
         finalPositions.append(generateRoutesRecursive(climber, wall, initialPosition))
 
         startPoint += 0.8 * armSpan
-    print("Point generateRoutes was reached")
     return finalPositions
 
 
 def generateRoutesRecursive(climber, wall, position):
     position.timestep += 1
-    print("EntryPoint generateRoutesRECURSIVE was reached")
     # Max depth of the tree is 10 moves.
     if position.timestep >= 10:
         print("Max depth of the tree is 10 moves ")
@@ -99,7 +110,6 @@ def generateRoutesRecursive(climber, wall, position):
                 if (first == 0):
                     finalPositions.append(generateRoutesRecursive(climber, wall, newPosition))
                     first += 1
-    print("ExitPoint generateRoutesRECURSIVE was reached")
     return finalPositions
 
 
@@ -120,9 +130,16 @@ def getReachableHolds(climber, wall, position, limb):
         # Calculate distance from the current limb position to the hold
         distance = ((hold_x - limb_x) ** 2 + (hold_y - limb_y) ** 2) ** 0.5
 
+        print(
+            f"Checking hold at ({hold_x}, {hold_y}) from limb at ({limb_x}, {limb_y}) with distance {distance} and max reach {max_reach}")
+
         # Check if the hold is within reach
         if distance <= max_reach:
-            # Further checks can be added here (e.g., color, size, or specific conditions)
             reachable_holds.append(hold)
+
+    if not reachable_holds:
+        print("No reachable holds found for this limb.")
+    else:
+        print("Reachable holds are available.")
 
     return reachable_holds
