@@ -1,1 +1,8 @@
 flask
+argparse
+opencv-python
+numpy
+matplotlib
+torch
+torchvision
+ultralytics
