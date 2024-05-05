@@ -1,5 +1,5 @@
-from .hold import Hold
-from .wall import Wall
+from hold import Hold
+from wall import Wall
 
 import os
 # from ultralytics import YOLO

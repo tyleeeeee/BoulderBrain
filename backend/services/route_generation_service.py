@@ -1,6 +1,9 @@
 from position import Position
 from pose_estimation_service import getPositionFromMove
 import json
+from image_processing_service import generate_dense_holds, get_holds_from_image
+from wall import Wall
+from climber import Climber
 # import matplotlib as plt
 
 # need to define inital position of limbs to calculate distance in reachable area. Setting them to  [-1, -1] means they start at an undefined position on the wall
@@ -17,49 +20,54 @@ def initializePosition(climber, startPoint, wall):
                                     climber.lower_leg_length + climber.upper_leg_length + climber.torso_height]
   initialPosition.right_shoulder = [startPoint + climber.torso_width / 2,
                                     climber.lower_leg_length + climber.upper_leg_length + climber.torso_height]
-  initialPosition.left_hand, initialPosition.right_hand = [-1, -1], [-1, -1]
-  initialPosition.left_foot, initialPosition.right_foot = [-1, -1], [-1, -1]
+  initialPosition.left_hand, initialPosition.right_hand = initialPosition.left_shoulder, initialPosition.right_shoulder
+  initialPosition.left_foot, initialPosition.right_foot = [startPoint - climber.torso_width / 2, 0], [startPoint + climber.torso_width / 2, 0]
 
   return initialPosition
 
-#Function which gives us strategic choice of which move to make as next one
+#From current position, selects four moves, one for each limb, prioritizing the biggest vertical moves.
 def selectNextMoves(climber, wall, current_position):
   best_moves = []
 
+  # If any limbs are not yet placed on the wall, then prioritize placing them on the wall.
   if min(current_position.left_hand[0], 
          current_position.right_hand[0], 
          current_position.left_foot[0], 
          current_position.right_foot[0]) < 0:
     
     for limb in ['left_hand', 'right_hand', 'left_foot', 'right_foot']:
-      if current_position[limb][0] < 0:
+      if getattr(current_position, limb)[0] < 0:
         reachable_holds = getReachableHolds(climber, wall, current_position, limb)
 
-        # Sort moves by height/highest y-value.
-        reachable_holds.sort(key = lambda hold: hold['location'][1], reverse=True)
-        highest_hold = reachable_holds[0]
-        newPosition = getPositionFromMove(current_position, climber, highest_hold, limb)
+        if reachable_holds:
+          # Sort moves by height/highest y-value.
+          reachable_holds.sort(key = lambda hold: getattr(hold, 'location')[1], reverse=True)
+        
+          highest_hold = reachable_holds[0]
+          newPosition = getPositionFromMove(current_position, climber, highest_hold, limb)
           
-        if newPosition: best_moves.append(newPosition)
+          best_moves.append(newPosition)
+    
             
 
   else:
     for limb in ['left_hand', 'right_hand', 'left_foot', 'right_foot']:
 
       reachable_holds = getReachableHolds(climber, wall, current_position, limb)
+      if reachable_holds:
         
-      # Sort moves by height/highest y-value.
-      reachable_holds.sort(key = lambda hold: hold['location'][1], reverse=True)
-      highest_hold = reachable_holds[0]
-      newPosition = getPositionFromMove(current_position, climber, highest_hold, limb)
+        # Sort moves by height/highest y-value.
+        reachable_holds.sort(key = lambda hold: getattr(hold, "location")[1], reverse=True)
+        highest_hold = reachable_holds[0]
+        newPosition = getPositionFromMove(current_position, climber, highest_hold, limb)
 
-      if newPosition: best_moves.append(newPosition)
+        best_moves.append(newPosition)
 
   if best_moves: return best_moves
 
   else:
     print("No best moves found.")
-    return None
+    return best_moves
 
 
 def generateRoutes(wall, climber):
@@ -116,7 +124,7 @@ def generateRoutesRecursive(climber, wall, position):
 
     if max(position.left_hand[1], position.right_hand[1], position.left_foot[1],
            position.right_foot[1]) >= wall.height * 0.9:
-        print("hand/foot is within 10\% of the height, so return ")
+        print("hand/foot is within 10% of the height from the top of the wall, so the route is finished. ")
         position.climber = None
         toReturn = json.dumps(position.__dict__)
         return [toReturn]
@@ -133,7 +141,7 @@ def generateRoutesRecursive(climber, wall, position):
           print("Alert: No best move could be selected based on the current criteria.")
 
     else:
-        # If all limbs are already on the wall, explore moves for all limbs.
+      # If all limbs are already on the wall, explore moves for all limbs.
       for position in selectNextMoves(climber, wall, position):
         # getPositionFromMove(current_position, climber, highest_hold, limb)
         finalPositions += generateRoutesRecursive(climber, wall, position)
@@ -159,7 +167,13 @@ def generateRoutesRecursive(climber, wall, position):
 
 def getReachableHolds(climber, wall, position, limb):
     reachable_holds = []
-    limb_x, limb_y = getattr(position, limb)  # x and y coordinates of a limb
+
+    # limb_x, limb_y = getattr(position, limb)  # x and y coordinates of a limb
+
+    if limb == "left_hand": limb_x, limb_y = position.left_shoulder
+    if limb == "right_hand": limb_x, limb_y = position.right_shoulder
+    if limb == "left_foot": limb_x, limb_y = position.left_hip
+    if limb == "right_foot": limb_x, limb_y = position.right_hip
 
     # Define reachability limits based on limb type
     if 'hand' in limb:
@@ -187,3 +201,20 @@ def getReachableHolds(climber, wall, position, limb):
         print("Reachable holds are available.")
 
     return reachable_holds
+
+wall = Wall(id=1, height=400, width=500) #made it quite larger on purpose
+climber = Climber(wall, height=180, upper_arm_length=40, forearm_length=30,
+                          upper_leg_length=45, lower_leg_length=40, torso_height=80,
+                          torso_width=50)
+
+# # Set up a new wall with holds
+# wall.holds = get_holds_from_image()
+#
+
+#new wall with dense holds
+wall.holds = get_holds_from_image()
+
+# generate routes
+routes = generateRoutes(wall, climber)
+
+print(routes)

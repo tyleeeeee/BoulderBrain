@@ -205,10 +205,10 @@ def getPositionFromMove(oldPosition, climber, newHold, limbToMove):
 
     
 
-    print("After moving the limb:")
-    vectorToString(x0)
-    print("After adjusting the torso:")
-    vectorToString(result_eq.x)
+    # print("After moving the limb:")
+    # vectorToString(x0)
+    # print("After adjusting the torso:")
+    # vectorToString(result_eq.x)
 
     # Return the updated position.
     return currPosition
