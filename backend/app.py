@@ -1,7 +1,6 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-from services.image_processing_service import get_holds_from_image
-from services.image_processing_service import generate_dense_holds
+from services.image_processing_service import generate_dense_holds, get_holds_from_image
 from services.route_generation_service import generateRoutes
 
 from services.climber import Climber
@@ -32,7 +31,7 @@ def api_generate_routes():
         #
 
         #new wall with dense holds
-        wall.holds = generate_dense_holds(wall)
+        wall.holds = get_holds_from_image()
 
         # generate routes
         routes = generateRoutes(wall, climber)

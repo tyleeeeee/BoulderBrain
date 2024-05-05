@@ -7,6 +7,26 @@ from hold import Hold
 from position import Position
 from wall import Wall
 
+def vectorToString(x):
+  print("Left hand:", (x[0], x[8]))
+  print("Left shoulder:", (x[1], x[9]))
+  print("Right hand:", (x[2], x[10]))
+  print("Right shoulder:", (x[3], x[11]))
+  print("Left foot:", (x[4], x[12]))
+  print("Left hip:", (x[5], x[13]))
+  print("Right foot:", (x[6], x[14]))
+  print("Right hip:", (x[7], x[15]))
+  print("Shoulder width:", x[19])
+  print("Shoulder distance:", distance.euclidean([x[1], x[9]], [x[3], x[11]]))
+  print("Hip width:", x[19])
+  print("Hip distance:", distance.euclidean([x[5], x[13]], [x[7], x[15]]))
+  print("Left side height:", x[18])
+  print("Left side distance:", distance.euclidean([x[1], x[9]], [x[5], x[13]]))
+  print("Right side height:", x[18])
+  print("Right side distance:", distance.euclidean([x[3], x[11]], [x[7], x[15]]))
+  print("Cross-body height:", sqrt(x[18] ** 2 + x[19] ** 2))
+  print("Cross-body distance:", distance.euclidean([x[1], x[9]], [x[7], x[15]]))
+
 
 def getPositionFromMove(oldPosition, climber, newHold, limbToMove):
     currPosition = oldPosition
@@ -164,16 +184,18 @@ def getPositionFromMove(oldPosition, climber, newHold, limbToMove):
         # 15: Right hip y-coordinate unfixed.
         (None, None),
         # 16, 17, 18, 19: Fixed distances between unfixed points are controlled via constraints, so there are no bounds.
-        (None, None),
-        (None, None),
-        (None, None),
-        (None, None)
+        (climber.upper_arm_length + climber.forearm_length, climber.upper_arm_length + climber.forearm_length),
+        (climber.lower_leg_length + climber.upper_leg_length, climber.lower_leg_length + climber.upper_leg_length),
+        (climber.torso_height, climber.torso_height),
+        (climber.torso_width, climber.torso_width)
     ]
 
     # Run scipy.minimize.
     result_eq = minimize(squaredDistances, x0, bounds=bounds,
-                         constraints=[leftLegIneq, rightLegIneq, leftArmIneq, rightArmIneq, shoulderEq, hipEq,
-                                      leftSideEq, rightSideEq, crossBodyEq])
+                         constraints=[leftLegIneq, rightLegIneq, leftArmIneq, rightArmIneq, 
+                                      shoulderEq, hipEq,
+                                      leftSideEq, rightSideEq, 
+                                      crossBodyEq])
 
     # Update the position using outputs from scipy.minimuze.
     currPosition.left_shoulder = [result_eq.x[1], result_eq.x[9]]
@@ -181,29 +203,11 @@ def getPositionFromMove(oldPosition, climber, newHold, limbToMove):
     currPosition.left_hip = [result_eq.x[5], result_eq.x[13]]
     currPosition.right_hip = [result_eq.x[7], result_eq.x[15]]
 
-    def vectorToString(x):
-      print("Left hand:", (x[0], x[8]))
-      print("Left shoulder:", (x[1], x[9]))
-      print("Right hand:", (x[2], x[10]))
-      print("Right shoulder:", (x[3], x[11]))
-      print("Left foot:", (x[4], x[12]))
-      print("Left hip:", (x[5], x[13]))
-      print("Right foot:", (x[6], x[14]))
-      print("Right hip:", (x[7], x[15]))
-      print("Shoulder width:", x[19])
-      print("Shoulder distance:", distance.euclidean([x[1], x[9]], [x[3], x[11]]))
-      print("Hip width:", x[19])
-      print("Hip distance:", distance.euclidean([x[5], x[13]], [x[7], x[15]]))
-      print("Left side height:", x[18])
-      print("Left side distance:", distance.euclidean([x[1], x[9]], [x[5], x[13]]))
-      print("Right side height:", x[18])
-      print("Right side distance:", distance.euclidean([x[3], x[11]], [x[7], x[15]]))
-      print("Cross-body height:", sqrt(x[18] ** 2 + x[19] ** 2))
-      print("Cross-body distance:", distance.euclidean([x[1], x[9]], [x[7], x[15]]))
+    
 
-    print("Original:")
+    print("After moving the limb:")
     vectorToString(x0)
-    print("Minimized:")
+    print("After adjusting the torso:")
     vectorToString(result_eq.x)
 
     # Return the updated position.
@@ -214,21 +218,28 @@ def getPositionFromMove(oldPosition, climber, newHold, limbToMove):
 newWall = Wall(1, 450, 450)
 newClimber = Climber(newWall)
 newPosition = Position(newClimber, 0, 1, [0, 0, 0, 0], 
-                       [170.0, 170.0], 
-                       [0.0, 0.0], 
-                       [200.0, 140.0], 
-                       [200.0, 70.0],
-                       [0.0, 0.0], 
-                       [200.0, 0.0], 
-                       [275.0, 170.0], 
+                       [170.0, 170.0], # left hand
+                       [0.0, 0.0], # left elbow
+                       [200.0, 140.0], #left shoulder
+                       [200.0, 70.0], #left hip
+                       [0.0, 0.0], #left knee
+                       [200.0, 0.0], # left foot
+                       [275.0, 170.0], # right hand, and so on...
                        [0.0, 0.0], 
                        [245.0, 140.0],
                        [245.0, 70.0], 
                        [0.0, 0.0],
                        [245.0, 0.0])
-newHold = Hold(newWall, [0.0, 0.0], "blue", False, [185.0, 185.0])
 
-updatedPosition = getPositionFromMove(newPosition, newClimber, newHold, "leftHand")
+newHold1 = Hold(newWall, [0.0, 0.0], "blue", False, [185.0, 185.0])
+newHold2 = Hold(newWall, [0.0, 0.0], "blue", False, [275.0, 200.0])
+newHold3 = Hold(newWall, [0.0, 0.0], "blue", False, [200.0, 20.0])
+newHold4 = Hold(newWall, [0.0, 0.0], "blue", False, [245.0, 50.0])
+
+updatedPosition1 = getPositionFromMove(newPosition, newClimber, newHold1, "leftHand")
+updatedPosition2 = getPositionFromMove(updatedPosition1, newClimber, newHold2, "rightHand")
+updatedPosition3 = getPositionFromMove(updatedPosition1, newClimber, newHold3, "leftFoot")
+updatedPosition4 = getPositionFromMove(updatedPosition1, newClimber, newHold4, "rightFoot")
 
 # 1. Update the limb coordinates in the human pose coordinates, using the new limb and new hold.
 # 2. Update the torso coordinates by calling getTorsoFromLimbs.

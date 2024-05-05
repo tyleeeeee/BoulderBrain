@@ -1,41 +1,65 @@
-from .position import Position
-from .pose_estimation_service import getPositionFromMove
+from position import Position
+from pose_estimation_service import getPositionFromMove
 import json
 # import matplotlib as plt
 
 # need to define inital position of limbs to calculate distance in reachable area. Setting them to  [-1, -1] means they start at an undefined position on the wall
 def initializePosition(climber, startPoint, wall):
-    initialPosition = Position(climber)
-    baseHeight = climber.lower_leg_length + 10 # TODO discuss assumption that climber start with feet at this height
+  initialPosition = Position(climber)
+  # baseHeight = climber.lower_leg_length + 10 # TODO discuss assumption that climber start with feet at this height
 
-    # Set initial limb positions
-    initialPosition.left_foot = [startPoint, baseHeight]
-    initialPosition.right_foot = [startPoint + climber.torso_width, baseHeight]
-    initialPosition.left_hand = [startPoint, baseHeight + climber.upper_leg_length + climber.torso_height]
-    initialPosition.right_hand = [startPoint + climber.torso_width, baseHeight + climber.upper_leg_length + climber.torso_height]
+  # Set initial limb positions
+  initialPosition.left_hip = [startPoint - climber.torso_width / 2,
+                              climber.lower_leg_length + climber.upper_leg_length]
+  initialPosition.right_hip = [startPoint + climber.torso_width / 2,
+                                climber.lower_leg_length + climber.upper_leg_length]
+  initialPosition.left_shoulder = [startPoint - climber.torso_width / 2,
+                                    climber.lower_leg_length + climber.upper_leg_length + climber.torso_height]
+  initialPosition.right_shoulder = [startPoint + climber.torso_width / 2,
+                                    climber.lower_leg_length + climber.upper_leg_length + climber.torso_height]
+  initialPosition.left_hand, initialPosition.right_hand = [-1, -1], [-1, -1]
+  initialPosition.left_foot, initialPosition.right_foot = [-1, -1], [-1, -1]
 
-    return initialPosition
+  return initialPosition
 
 #Function which gives us strategic choice of which move to make as next one
-def selectNextMove(climber, wall, current_position):
-    best_moves = []
+def selectNextMoves(climber, wall, current_position):
+  best_moves = []
+
+  if min(current_position.left_hand[0], 
+         current_position.right_hand[0], 
+         current_position.left_foot[0], 
+         current_position.right_foot[0]) < 0:
+    
     for limb in ['left_hand', 'right_hand', 'left_foot', 'right_foot']:
+      if current_position[limb][0] < 0:
         reachable_holds = getReachableHolds(climber, wall, current_position, limb)
-        for hold in reachable_holds:
-            newPosition = getPositionFromMove(current_position, climber, hold, limb)
-            if newPosition:
-                # get vertical gain for each move
-                vertical_gain = newPosition.__dict__[limb][1] - current_position.__dict__[limb][1]
-                best_moves.append((newPosition, vertical_gain))
 
-    # Now: choose move that gives highest vertical position
-    best_moves.sort(key=lambda x: x[1], reverse=True)
+        # Sort moves by height/highest y-value.
+        reachable_holds.sort(key = lambda hold: hold['location'][1], reverse=True)
+        highest_hold = reachable_holds[0]
+        newPosition = getPositionFromMove(current_position, climber, highest_hold, limb)
+          
+        if newPosition: best_moves.append(newPosition)
+            
 
-    if best_moves:
-        return best_moves[0][0]
-    else:
-        print("Attention: No best move could be selected.")
-        return None
+  else:
+    for limb in ['left_hand', 'right_hand', 'left_foot', 'right_foot']:
+
+      reachable_holds = getReachableHolds(climber, wall, current_position, limb)
+        
+      # Sort moves by height/highest y-value.
+      reachable_holds.sort(key = lambda hold: hold['location'][1], reverse=True)
+      highest_hold = reachable_holds[0]
+      newPosition = getPositionFromMove(current_position, climber, highest_hold, limb)
+
+      if newPosition: best_moves.append(newPosition)
+
+  if best_moves: return best_moves
+
+  else:
+    print("No best moves found.")
+    return None
 
 
 def generateRoutes(wall, climber):
@@ -70,17 +94,6 @@ def generateRoutes(wall, climber):
         # Most important for the initial position is the location of the torso, which defines the reachable holds.
         # Hands and feet have negative values to represent that they begin "nowhere" on the wall.
 
-        # initialPosition.left_hip = [startPoint - climber.torso_width / 2,
-        #                             climber.lower_leg_length + climber.upper_leg_length]
-        # initialPosition.right_hip = [startPoint + climber.torso_width / 2,
-        #                              climber.lower_leg_length + climber.upper_leg_length]
-        # initialPosition.left_shoulder = [startPoint - climber.torso_width / 2,
-        #                                  climber.lower_leg_length + climber.upper_leg_length + climber.torso_height]
-        # initialPosition.right_shoulder = [startPoint + climber.torso_width / 2,
-        #                                   climber.lower_leg_length + climber.upper_leg_length + climber.torso_height]
-        # initialPosition.left_hand, initialPosition.right_hand = [-1, -1], [-1, -1]
-        # initialPosition.left_foot, initialPosition.right_foot = [-1, -1], [-1, -1]
-
         # Explore the full tree of generated routes with generateRoutesRecursive, and append it to the results.
         finalPositions.append(generateRoutesRecursive(climber, wall, initialPosition))
 
@@ -90,9 +103,9 @@ def generateRoutes(wall, climber):
 
 def generateRoutesRecursive(climber, wall, position):
     position.timestep += 1
-    # Max depth of the tree is 20 moves.
-    if position.timestep >= 20:
-        print("Max depth of the tree is 20 moves ")
+    # Max depth of the tree is 30 moves.
+    if position.timestep >= 30:
+        print("Max depth of the tree is 30 moves ")
         position.climber = None
 
         toReturn = json.dumps(position.__dict__)
@@ -111,25 +124,31 @@ def generateRoutesRecursive(climber, wall, position):
     # Array to be returned.
     finalPositions = []
 
-    # If limbs are not placed, find moves for them.
+    # If any limbs are not placed on the wall already, prioritize finding moves for them.
     if min(position.left_hand[0], position.right_hand[0], position.left_foot[0], position.right_foot[0]) < 0:
-        next_position = selectNextMove(climber, wall, position)
-        if next_position:
-            finalPositions += generateRoutesRecursive(climber, wall, next_position)
-        else:
-            print("Alert: No best move could be selected based on the current criteria.")
+      for position in selectNextMoves(climber, wall, position):
+        # getPositionFromMove(current_position, climber, highest_hold, limb)
+        finalPositions += generateRoutesRecursive(climber, wall, position)
+      else:
+          print("Alert: No best move could be selected based on the current criteria.")
+
     else:
-        # Explore all moves for already placed limbs.
-        move_found = False
-        for limb in ['left_hand', 'right_hand', 'left_foot', 'right_foot']:
-            for hold in getReachableHolds(climber, wall, position, limb):
-                newPosition = getPositionFromMove(position, climber, hold, limb)
-                if newPosition:
-                    finalPositions += generateRoutesRecursive(climber, wall, newPosition)
-                    move_found = True
-                    break  # for now: we break after first successful move to reduce complexity
-            if move_found:
-                break
+        # If all limbs are already on the wall, explore moves for all limbs.
+      for position in selectNextMoves(climber, wall, position):
+        # getPositionFromMove(current_position, climber, highest_hold, limb)
+        finalPositions += generateRoutesRecursive(climber, wall, position)
+      else:
+          print("Alert: No best move could be selected based on the current criteria.")
+        # move_found = False
+        # for limb in ['left_hand', 'right_hand', 'left_foot', 'right_foot']:
+        #     for hold in getReachableHolds(climber, wall, position, limb):
+        #         newPosition = getPositionFromMove(position, climber)
+        #         if newPosition:
+        #             finalPositions += generateRoutesRecursive(climber, wall, newPosition)
+        #             move_found = True
+        #             break  # for now: we break after first successful move to reduce complexity
+        #     if move_found:
+        #         break
 
     # handle case when no moves are possible
     if not finalPositions:
