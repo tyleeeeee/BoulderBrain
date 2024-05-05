@@ -2,10 +2,10 @@ import numpy as np
 from scipy.spatial import distance
 from scipy.optimize import minimize
 from math import sqrt
-from .climber import Climber
-from .hold import Hold
-from .position import Position
-from .wall import Wall
+from climber import Climber
+from hold import Hold
+from position import Position
+from wall import Wall
 
 
 def getPositionFromMove(oldPosition, climber, newHold, limbToMove):
@@ -19,8 +19,6 @@ def getPositionFromMove(oldPosition, climber, newHold, limbToMove):
         currPosition.left_foot = [newHold.yMax[0], newHold.yMax[1]]
     elif limbToMove == "rightFoot":
         currPosition.right_foot = [newHold.yMax[0], newHold.yMax[1]]
-
-    return currPosition
 
     # Vectorize position for optimization function (accepts 1D array). By index, the values are:
     # x[0]: Left hand x-coordinate
@@ -183,46 +181,55 @@ def getPositionFromMove(oldPosition, climber, newHold, limbToMove):
     currPosition.left_hip = [result_eq.x[5], result_eq.x[13]]
     currPosition.right_hip = [result_eq.x[7], result_eq.x[15]]
 
+    def vectorToString(x):
+      print("Left hand:", (x[0], x[8]))
+      print("Left shoulder:", (x[1], x[9]))
+      print("Right hand:", (x[2], x[10]))
+      print("Right shoulder:", (x[3], x[11]))
+      print("Left foot:", (x[4], x[12]))
+      print("Left hip:", (x[5], x[13]))
+      print("Right foot:", (x[6], x[14]))
+      print("Right hip:", (x[7], x[15]))
+      print("Shoulder width:", x[19])
+      print("Shoulder distance:", distance.euclidean([x[1], x[9]], [x[3], x[11]]))
+      print("Hip width:", x[19])
+      print("Hip distance:", distance.euclidean([x[5], x[13]], [x[7], x[15]]))
+      print("Left side height:", x[18])
+      print("Left side distance:", distance.euclidean([x[1], x[9]], [x[5], x[13]]))
+      print("Right side height:", x[18])
+      print("Right side distance:", distance.euclidean([x[3], x[11]], [x[7], x[15]]))
+      print("Cross-body height:", sqrt(x[18] ** 2 + x[19] ** 2))
+      print("Cross-body distance:", distance.euclidean([x[1], x[9]], [x[7], x[15]]))
+
+    print("Original:")
+    vectorToString(x0)
+    print("Minimized:")
+    vectorToString(result_eq.x)
+
     # Return the updated position.
     return currPosition
 
 
 # TODO: can this be deleted?
 newWall = Wall(1, 450, 450)
-newClimber = Climber(1, newWall)
-newPosition = Position(1, newClimber, 0, 1, [0, 0, 0, 0], [170.0, 170.0], [0.0, 0.0], [200.0, 140.0], [200.0, 70.0],
-                       [0.0, 0.0], [200.0, 0.0], [275.0, 170.0], [0.0, 0.0], [245.0, 140.0], [245.0, 70.0], [0.0, 0.0],
+newClimber = Climber(newWall)
+newPosition = Position(newClimber, 0, 1, [0, 0, 0, 0], 
+                       [170.0, 170.0], 
+                       [0.0, 0.0], 
+                       [200.0, 140.0], 
+                       [200.0, 70.0],
+                       [0.0, 0.0], 
+                       [200.0, 0.0], 
+                       [275.0, 170.0], 
+                       [0.0, 0.0], 
+                       [245.0, 140.0],
+                       [245.0, 70.0], 
+                       [0.0, 0.0],
                        [245.0, 0.0])
-newHold = Hold(newWall, [0.0, 0.0], "blue", False, [185.0, 155.0])
+newHold = Hold(newWall, [0.0, 0.0], "blue", False, [185.0, 185.0])
 
 updatedPosition = getPositionFromMove(newPosition, newClimber, newHold, "leftHand")
 
 # 1. Update the limb coordinates in the human pose coordinates, using the new limb and new hold.
 # 2. Update the torso coordinates by calling getTorsoFromLimbs.
 # 3. Return the new human pose coordinates.
-
-
-# def vectorToString(x):
-#   print("Left hand:", (x[0], x[8]))
-#   print("Left shoulder:", (x[1], x[9]))
-#   print("Right hand:", (x[2], x[10]))
-#   print("Right shoulder:", (x[3], x[11]))
-#   print("Left foot:", (x[4], x[12]))
-#   print("Left hip:", (x[5], x[13]))
-#   print("Right foot:", (x[6], x[14]))
-#   print("Right hip:", (x[7], x[15]))
-#   print("Shoulder width:", x[19])
-#   print("Shoulder distance:", distance.euclidean([x[1], x[9]], [x[3], x[11]]))
-#   print("Hip width:", x[19])
-#   print("Hip distance:", distance.euclidean([x[5], x[13]], [x[7], x[15]]))
-#   print("Left side height:", x[18])
-#   print("Left side distance:", distance.euclidean([x[1], x[9]], [x[5], x[13]]))
-#   print("Right side height:", x[18])
-#   print("Right side distance:", distance.euclidean([x[3], x[11]], [x[7], x[15]]))
-#   print("Cross-body height:", sqrt(x[18] ** 2 + x[19] ** 2))
-#   print("Cross-body distance:", distance.euclidean([x[1], x[9]], [x[7], x[15]]))
-
-# print("Original:")
-# vectorToString(x0)
-# print("Minimized:")
-# vectorToString(result_eq.x)
