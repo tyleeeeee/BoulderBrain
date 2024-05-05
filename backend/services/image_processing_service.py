@@ -2,7 +2,7 @@ from .hold import Hold
 from .wall import Wall
 
 import os
-from ultralytics import YOLO
+# from ultralytics import YOLO
 
 # # Print the current working directory to confirm it
 # print("Current Working Directory:", os.getcwd())

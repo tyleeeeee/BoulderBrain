@@ -1,5 +1,7 @@
 from .position import Position
 from .pose_estimation_service import getPositionFromMove
+import json
+# import matplotlib as plt
 
 # need to define inital position of limbs to calculate distance in reachable area. Setting them to  [-1, -1] means they start at an undefined position on the wall
 def initializePosition(climber, startPoint, wall):
@@ -91,15 +93,20 @@ def generateRoutesRecursive(climber, wall, position):
     # Max depth of the tree is 20 moves.
     if position.timestep >= 20:
         print("Max depth of the tree is 20 moves ")
-        return []
+        position.climber = None
+
+        toReturn = json.dumps(position.__dict__)
+        return [toReturn]
 
     # If any hand (or foot) is within 10% of the height of the wall from the top, then declare the
     # route finished.
 
     if max(position.left_hand[1], position.right_hand[1], position.left_foot[1],
            position.right_foot[1]) >= wall.height * 0.9:
-        print("hand/foot is within 10% of the height, so return ")
-        return []
+        print("hand/foot is within 10\% of the height, so return ")
+        position.climber = None
+        toReturn = json.dumps(position.__dict__)
+        return [toReturn]
 
     # Array to be returned.
     finalPositions = []

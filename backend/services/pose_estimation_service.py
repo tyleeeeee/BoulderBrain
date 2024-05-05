@@ -5,7 +5,6 @@ from math import sqrt
 from .climber import Climber
 from .hold import Hold
 from .position import Position
-from .route import Route
 from .wall import Wall
 
 
