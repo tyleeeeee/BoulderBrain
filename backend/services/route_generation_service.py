@@ -4,6 +4,8 @@ import json
 from image_processing_service import generate_dense_holds, get_holds_from_image
 from wall import Wall
 from climber import Climber
+import copy
+import random
 # import matplotlib as plt
 
 # need to define inital position of limbs to calculate distance in reachable area. Setting them to  [-1, -1] means they start at an undefined position on the wall
@@ -41,10 +43,15 @@ def selectNextMoves(climber, wall, current_position):
 
         if reachable_holds:
           # Sort moves by height/highest y-value.
-          reachable_holds.sort(key = lambda hold: getattr(hold, 'location')[1], reverse=True)
+          reachable_holds.sort(key = lambda hold: getattr(hold, 'yMax')[1], reverse=True)
         
           highest_hold = reachable_holds[0]
+          print("Currently, the", limb, "is at", getattr(current_position, limb), "and the hold it's moving to is at", highest_hold.yMax)
           newPosition = getPositionFromMove(current_position, climber, highest_hold, limb)
+          if newPosition == current_position: 
+            print("getPosition returned the same position!")
+            
+          else: print("getPosition updated the position!")
           
           best_moves.append(newPosition)
     
@@ -57,13 +64,19 @@ def selectNextMoves(climber, wall, current_position):
       if reachable_holds:
         
         # Sort moves by height/highest y-value.
-        reachable_holds.sort(key = lambda hold: getattr(hold, "location")[1], reverse=True)
+        reachable_holds.sort(key = lambda hold: getattr(hold, "yMax")[1], reverse=True)
         highest_hold = reachable_holds[0]
+        print("Currently, the", limb, "is at", getattr(current_position, limb), "and the hold it's moving to is at", highest_hold.yMax)
         newPosition = getPositionFromMove(current_position, climber, highest_hold, limb)
+        if newPosition == current_position: 
+           print("getPosition returned the same position!")
+        else: print("getPosition updated the position!")
 
         best_moves.append(newPosition)
 
-  if best_moves: return best_moves
+  if best_moves: 
+     print("Number of moves we explore next:", len(best_moves))
+     return best_moves
 
   else:
     print("No best moves found.")
@@ -96,57 +109,71 @@ def generateRoutes(wall, climber):
     while startPoint < wall.width:
         # The starting point for
         initialPosition =  initializePosition(climber, startPoint, wall)
-        print("entry while loop with starting point: ", startPoint)
+        print("Tree root (route starting point): ", startPoint)
         initialPosition.timestep = 0
 
         # Most important for the initial position is the location of the torso, which defines the reachable holds.
         # Hands and feet have negative values to represent that they begin "nowhere" on the wall.
 
         # Explore the full tree of generated routes with generateRoutesRecursive, and append it to the results.
-        finalPositions.append(generateRoutesRecursive(climber, wall, initialPosition))
+        finalPositions = finalPositions + generateRoutesRecursive(climber, wall, initialPosition, None)
 
         startPoint += 0.8 * armSpan
     return finalPositions
 
 
-def generateRoutesRecursive(climber, wall, position):
+def generateRoutesRecursive(climber, wall, position, parentPosition):
+    if (parentPosition != None and position.toString() == parentPosition.toString()): print("Error! Position's parent is itself!!!!!!!!!!!!!!!!!!!!!")
+    position.parent_position = parentPosition
     position.timestep += 1
     # Max depth of the tree is 30 moves.
-    if position.timestep >= 30:
-        print("Max depth of the tree is 30 moves ")
+    if position.timestep >= 6:
+        print("Max depth of the tree is 8 moves.")
         position.climber = None
 
-        toReturn = json.dumps(position.__dict__)
-        return [toReturn]
+        # toReturn = json.dumps(position.__dict__)
+        return [position]
 
     # If any hand (or foot) is within 10% of the height of the wall from the top, then declare the
     # route finished.
 
     if max(position.left_hand[1], position.right_hand[1], position.left_foot[1],
            position.right_foot[1]) >= wall.height * 0.9:
-        print("hand/foot is within 10% of the height from the top of the wall, so the route is finished. ")
+        print("Hand/foot is within 10% of the height from the top of the wall, so the route is finished. ")
         position.climber = None
-        toReturn = json.dumps(position.__dict__)
-        return [toReturn]
+        # toReturn = json.dumps(position.__dict__)
+        return [position]
 
     # Array to be returned.
-    finalPositions = []
+    finalPositions = [position]
 
     # If any limbs are not placed on the wall already, prioritize finding moves for them.
     if min(position.left_hand[0], position.right_hand[0], position.left_foot[0], position.right_foot[0]) < 0:
-      for position in selectNextMoves(climber, wall, position):
+
+      # Returns an array of positions.
+      nextMoves = selectNextMoves(climber, wall, position)
+
+      for nextPosition in nextMoves:
         # getPositionFromMove(current_position, climber, highest_hold, limb)
-        finalPositions += generateRoutesRecursive(climber, wall, position)
-      else:
-          print("Alert: No best move could be selected based on the current criteria.")
+        if (nextPosition != position):
+          print("These positions are not equal!")
+          finalPositions = finalPositions + generateRoutesRecursive(climber, wall, nextPosition, position)
+        else: 
+           print("All the found positions equal the current position!")
+      # else: print("Alert: No best move could be selected based on the current criteria.")
 
     else:
       # If all limbs are already on the wall, explore moves for all limbs.
-      for position in selectNextMoves(climber, wall, position):
+      nextMoves = selectNextMoves(climber, wall, position)
+
+      for nextPosition in nextMoves:
         # getPositionFromMove(current_position, climber, highest_hold, limb)
-        finalPositions += generateRoutesRecursive(climber, wall, position)
-      else:
-          print("Alert: No best move could be selected based on the current criteria.")
+        if (nextPosition != position):
+          print("These positions are not equal!")
+          finalPositions = finalPositions + (generateRoutesRecursive(climber, wall, nextPosition, position))
+        else: print("All the found positions equal the current position!")
+      # else: print("Alert: No best move could be selected based on the current criteria.")
+
         # move_found = False
         # for limb in ['left_hand', 'right_hand', 'left_foot', 'right_foot']:
         #     for hold in getReachableHolds(climber, wall, position, limb):
@@ -170,10 +197,18 @@ def getReachableHolds(climber, wall, position, limb):
 
     # limb_x, limb_y = getattr(position, limb)  # x and y coordinates of a limb
 
-    if limb == "left_hand": limb_x, limb_y = position.left_shoulder
-    if limb == "right_hand": limb_x, limb_y = position.right_shoulder
-    if limb == "left_foot": limb_x, limb_y = position.left_hip
-    if limb == "right_foot": limb_x, limb_y = position.right_hip
+    if limb == "left_hand": 
+       limb_x, limb_y = position.left_shoulder
+       currentHold = position.left_hand
+    if limb == "right_hand": 
+       limb_x, limb_y = position.right_shoulder
+       currentHold = position.right_hand
+    if limb == "left_foot": 
+       limb_x, limb_y = position.left_hip
+       currentHold = position.left_foot
+    if limb == "right_foot": 
+       limb_x, limb_y = position.right_hip
+       currentHold = position.right_foot
 
     # Define reachability limits based on limb type
     if 'hand' in limb:
@@ -183,22 +218,21 @@ def getReachableHolds(climber, wall, position, limb):
 
     # Iterate through all holds on the wall
     for hold in wall.holds:
-        hold_x, hold_y = hold.location  # Location of the hold on the wall
+        hold_x, hold_y = hold.yMax  # Location of the hold on the wall
 
         # Calculate distance from the current limb position to the hold
         distance = ((hold_x - limb_x) ** 2 + (hold_y - limb_y) ** 2) ** 0.5
 
-        print(
-            f"Checking hold at ({hold_x}, {hold_y}) from limb at ({limb_x}, {limb_y}) with distance {distance} and max reach {max_reach}")
+        # print(f"Checking hold at ({hold_x}, {hold_y}) from limb at ({limb_x}, {limb_y}) with distance {distance} and max reach {max_reach}")
 
-        # Check if the hold is within reach
-        if distance <= max_reach:
+        # Check if the hold is within reach, and not the same hold the hand is on, and that its y coordinate is higher than the current holds.
+        if distance <= max_reach and currentHold != [hold_x, hold_y] and hold_y > currentHold[1]:
             reachable_holds.append(hold)
 
     if not reachable_holds:
         print("No reachable holds found for this limb.")
     else:
-        print("Reachable holds are available.")
+        print("Reachable holds are available:", len(reachable_holds))
 
     return reachable_holds
 
@@ -212,9 +246,29 @@ climber = Climber(wall, height=180, upper_arm_length=40, forearm_length=30,
 #
 
 #new wall with dense holds
-wall.holds = get_holds_from_image()
+wall.holds = generate_dense_holds(wall)
 
 # generate routes
 routes = generateRoutes(wall, climber)
 
-print(routes)
+print("Number of routes generated: ", len(routes))
+
+for position in routes: print(position.toString())
+
+finalPosition = routes[random.randint(1, len(routes))]
+
+finalRoute = [finalPosition.toString()]
+
+currentPosition = finalPosition
+parentPosition = currentPosition.parent_position
+iteration = 0
+while (currentPosition.parent_position != None):
+  iteration += 1
+  print("Iteration: ", iteration)
+  print("Current position:", currentPosition.toString())
+  print("Parent position: ", parentPosition.toString())
+  finalRoute.insert(0, currentPosition.parent_position.toString())
+  currentPosition = copy.deepcopy(parentPosition)
+  parentPosition = currentPosition.parent_position
+
+# print(finalRoute)
