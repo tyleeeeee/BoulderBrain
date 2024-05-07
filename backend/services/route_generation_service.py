@@ -1,9 +1,9 @@
-from position import Position
-from pose_estimation_service import getPositionFromMove
-import json
-from image_processing_service import generate_dense_holds, get_holds_from_image
-from wall import Wall
-from climber import Climber
+
+from .pose_estimation_service import getPositionFromMove
+from .image_processing_service import generate_dense_holds, get_holds_from_image
+from .position import Position
+from .wall import Wall
+from .climber import Climber
 import copy
 import random
 # import matplotlib as plt
@@ -131,7 +131,6 @@ def generateRoutesRecursive(climber, wall, position, parentPosition):
         print("Max depth of the tree is 8 moves.")
         position.climber = None
 
-        # toReturn = json.dumps(position.__dict__)
         return [position]
 
     # If any hand (or foot) is within 10% of the height of the wall from the top, then declare the
@@ -141,7 +140,6 @@ def generateRoutesRecursive(climber, wall, position, parentPosition):
            position.right_foot[1]) >= wall.height * 0.9:
         print("Hand/foot is within 10% of the height from the top of the wall, so the route is finished. ")
         position.climber = None
-        # toReturn = json.dumps(position.__dict__)
         return [position]
 
     # Array to be returned.
@@ -246,29 +244,29 @@ climber = Climber(wall, height=180, upper_arm_length=40, forearm_length=30,
 #
 
 #new wall with dense holds
-wall.holds = generate_dense_holds(wall)
+# wall.holds = generate_dense_holds(wall)
 
-# generate routes
-routes = generateRoutes(wall, climber)
+# # generate routes
+# routes = generateRoutes(wall, climber)
 
-print("Number of routes generated: ", len(routes))
+# print("Number of routes generated: ", len(routes))
 
-for position in routes: print(position.toString())
+# for position in routes: print(position.toString())
 
-finalPosition = routes[random.randint(1, len(routes))]
+# finalPosition = routes[random.randint(1, len(routes))]
 
-finalRoute = [finalPosition.toString()]
+# finalRoute = [finalPosition.toString()]
 
-currentPosition = finalPosition
-parentPosition = currentPosition.parent_position
-iteration = 0
-while (currentPosition.parent_position != None):
-  iteration += 1
-  print("Iteration: ", iteration)
-  print("Current position:", currentPosition.toString())
-  print("Parent position: ", parentPosition.toString())
-  finalRoute.insert(0, currentPosition.parent_position.toString())
-  currentPosition = copy.deepcopy(parentPosition)
-  parentPosition = currentPosition.parent_position
+# currentPosition = finalPosition
+# parentPosition = currentPosition.parent_position
+# iteration = 0
+# while (currentPosition.parent_position != None):
+#   iteration += 1
+#   print("Iteration: ", iteration)
+#   print("Current position:", currentPosition.toString())
+#   print("Parent position: ", parentPosition.toString())
+#   finalRoute.insert(0, currentPosition.parent_position.toString())
+#   currentPosition = copy.deepcopy(parentPosition)
+#   parentPosition = currentPosition.parent_position
 
-# print(finalRoute)
+# # print(finalRoute)

@@ -2,10 +2,10 @@ import numpy as np
 from scipy.spatial import distance
 from scipy.optimize import minimize
 from math import sqrt
-from climber import Climber
-from hold import Hold
-from position import Position
-from wall import Wall
+from .climber import Climber
+from .hold import Hold
+from .position import Position
+from .wall import Wall
 import copy
 
 def vectorToString(x):
