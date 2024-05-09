@@ -2,10 +2,11 @@ import numpy as np
 from scipy.spatial import distance
 from scipy.optimize import minimize
 from math import sqrt
-from climber import Climber
-from hold import Hold
-from position import Position
-from wall import Wall
+from .climber import Climber
+from .hold import Hold
+from .position import Position
+from .wall import Wall
+import copy
 
 def vectorToString(x):
   print("Left hand:", (x[0], x[8]))
@@ -29,17 +30,23 @@ def vectorToString(x):
 
 
 def getPositionFromMove(oldPosition, climber, newHold, limbToMove):
-    currPosition = oldPosition
+    currPosition = copy.deepcopy(oldPosition)
 
-    if limbToMove == "leftHand":
+    if limbToMove == "left_hand":
+        print("Updating left hand from", currPosition.left_hand, "to", [newHold.yMax[0], newHold.yMax[1]])
         currPosition.left_hand = [newHold.yMax[0], newHold.yMax[1]]
-    elif limbToMove == "rightHand":
+    elif limbToMove == "right_hand":
+        print("Updating right hand from", currPosition.right_hand, "to", [newHold.yMax[0], newHold.yMax[1]])
         currPosition.right_hand = [newHold.yMax[0], newHold.yMax[1]]
-    elif limbToMove == "leftFoot":
+    elif limbToMove == "left_foot":
+        print("Updating left foot from", currPosition.left_foot, "to", [newHold.yMax[0], newHold.yMax[1]])
         currPosition.left_foot = [newHold.yMax[0], newHold.yMax[1]]
-    elif limbToMove == "rightFoot":
+    elif limbToMove == "right_foot":
+        print("Updating right foot from", currPosition.right_foot, "to", [newHold.yMax[0], newHold.yMax[1]])
         currPosition.right_foot = [newHold.yMax[0], newHold.yMax[1]]
+    else: print("Error: limbToMove is invalid.")
 
+    if currPosition == oldPosition: print("Current still equals old somehow.")
     # Vectorize position for optimization function (accepts 1D array). By index, the values are:
     # x[0]: Left hand x-coordinate
     # x[1]: Left shoulder x-coordinate
@@ -68,6 +75,7 @@ def getPositionFromMove(oldPosition, climber, newHold, limbToMove):
         totalSqDist += distance.euclidean([x[2], x[10]], [x[3], x[11]]) ** 2
         totalSqDist += distance.euclidean([x[4], x[12]], [x[5], x[13]]) ** 2
         totalSqDist += distance.euclidean([x[6], x[14]], [x[7], x[15]]) ** 2
+        # print(totalSqDist)
         return totalSqDist
 
     # All constraint functions:
@@ -205,41 +213,41 @@ def getPositionFromMove(oldPosition, climber, newHold, limbToMove):
 
     
 
-    print("After moving the limb:")
-    vectorToString(x0)
-    print("After adjusting the torso:")
-    vectorToString(result_eq.x)
+    # print("After moving the limb:")
+    # vectorToString(x0)
+    # print("After adjusting the torso:")
+    # vectorToString(result_eq.x)
 
     # Return the updated position.
     return currPosition
 
 
 # TODO: can this be deleted?
-newWall = Wall(1, 450, 450)
-newClimber = Climber(newWall)
-newPosition = Position(newClimber, 0, 1, [0, 0, 0, 0], 
-                       [170.0, 170.0], # left hand
-                       [0.0, 0.0], # left elbow
-                       [200.0, 140.0], #left shoulder
-                       [200.0, 70.0], #left hip
-                       [0.0, 0.0], #left knee
-                       [200.0, 0.0], # left foot
-                       [275.0, 170.0], # right hand, and so on...
-                       [0.0, 0.0], 
-                       [245.0, 140.0],
-                       [245.0, 70.0], 
-                       [0.0, 0.0],
-                       [245.0, 0.0])
+# newWall = Wall(1, 450, 450)
+# newClimber = Climber(newWall)
+# newPosition = Position(newClimber, 0, 1, [0, 0, 0, 0], 
+#                        [170.0, 170.0], # left hand
+#                        [0.0, 0.0], # left elbow
+#                        [200.0, 140.0], #left shoulder
+#                        [200.0, 70.0], #left hip
+#                        [0.0, 0.0], #left knee
+#                        [200.0, 0.0], # left foot
+#                        [275.0, 170.0], # right hand, and so on...
+#                        [0.0, 0.0], 
+#                        [245.0, 140.0],
+#                        [245.0, 70.0], 
+#                        [0.0, 0.0],
+#                        [245.0, 0.0])
 
-newHold1 = Hold(newWall, [0.0, 0.0], "blue", False, [185.0, 185.0])
-newHold2 = Hold(newWall, [0.0, 0.0], "blue", False, [275.0, 200.0])
-newHold3 = Hold(newWall, [0.0, 0.0], "blue", False, [200.0, 20.0])
-newHold4 = Hold(newWall, [0.0, 0.0], "blue", False, [245.0, 50.0])
+# newHold1 = Hold(newWall, [0.0, 0.0], "blue", False, [185.0, 185.0])
+# newHold2 = Hold(newWall, [0.0, 0.0], "blue", False, [275.0, 200.0])
+# newHold3 = Hold(newWall, [0.0, 0.0], "blue", False, [200.0, 20.0])
+# newHold4 = Hold(newWall, [0.0, 0.0], "blue", False, [245.0, 50.0])
 
-updatedPosition1 = getPositionFromMove(newPosition, newClimber, newHold1, "leftHand")
-updatedPosition2 = getPositionFromMove(updatedPosition1, newClimber, newHold2, "rightHand")
-updatedPosition3 = getPositionFromMove(updatedPosition1, newClimber, newHold3, "leftFoot")
-updatedPosition4 = getPositionFromMove(updatedPosition1, newClimber, newHold4, "rightFoot")
+# updatedPosition1 = getPositionFromMove(newPosition, newClimber, newHold1, "leftHand")
+# updatedPosition2 = getPositionFromMove(updatedPosition1, newClimber, newHold2, "rightHand")
+# updatedPosition3 = getPositionFromMove(updatedPosition1, newClimber, newHold3, "leftFoot")
+# updatedPosition4 = getPositionFromMove(updatedPosition1, newClimber, newHold4, "rightFoot")
 
 # 1. Update the limb coordinates in the human pose coordinates, using the new limb and new hold.
 # 2. Update the torso coordinates by calling getTorsoFromLimbs.

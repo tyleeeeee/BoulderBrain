@@ -6,6 +6,9 @@ from services.route_generation_service import generateRoutes
 from services.climber import Climber
 from services.wall import Wall
 
+import random
+import copy
+
 app = Flask(__name__)
 CORS(app)
 
@@ -31,10 +34,32 @@ def api_generate_routes():
         #
 
         #new wall with dense holds
-        wall.holds = get_holds_from_image()
+        wall.holds = generate_dense_holds(wall)
 
         # generate routes
         routes = generateRoutes(wall, climber)
+
+        print("Number of routes generated: ", len(routes))
+
+        for position in routes: print(position.toString())
+
+        finalPosition = routes[random.randint(1, len(routes))]
+
+        finalRoute = [finalPosition.toString()]
+
+        currentPosition = finalPosition
+        parentPosition = currentPosition.parent_position
+        iteration = 0
+        while (currentPosition.parent_position != None):
+            iteration += 1
+            print("Iteration: ", iteration)
+            print("Current position:", currentPosition.toString())
+            print("Parent position: ", parentPosition.toString())
+            finalRoute.insert(0, currentPosition.parent_position.toString())
+            currentPosition = copy.deepcopy(parentPosition)
+            parentPosition = currentPosition.parent_position
+
+        # print(finalRoute)
 
         if not routes:
             raise ValueError("No routes could be generated with the current setup.")

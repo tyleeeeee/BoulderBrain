@@ -44,3 +44,7 @@ class Position:
         self.right_hip = right_hip
         self.right_knee = right_knee
         self.right_foot = right_foot
+
+    def toString(self):
+        return f"Left Hand: {self.left_hand}, Left Shoulder: {self.left_shoulder}, Left Hip: {self.left_hip}, Left Foot: {self.left_foot}, Right Hand: {self.right_hand}, Right Shoulder: {self.right_shoulder}, Right Hip: {self.right_hip}, Right Foot: {self.right_foot}"
+    

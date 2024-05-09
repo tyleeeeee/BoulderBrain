@@ -14,4 +14,3 @@ class Climber:
 
     # Climber skill level (int), default is -1 (VB)
     self.level = level
-
