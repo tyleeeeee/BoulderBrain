@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from services.image_processing_service import generate_dense_holds, get_holds_from_image
 from services.route_generation_service import generateRoutes
+from services.reachable_foot_area import calc_knee_angle, calc_hold_angle, calc_hip_angle, calc_max_hip_angle
 
 from services.climber import Climber
 from services.wall import Wall
@@ -24,46 +25,49 @@ def data():
 def api_generate_routes():
     try:
         # Initialize Wall and Climber
-        wall = Wall(id=1, height=400, width=500) #made it quite larger on purpose
-        climber = Climber(wall, height=180, upper_arm_length=40, forearm_length=30,
+        newWall = Wall(id=1, height=400, width=500) #made it quite larger on purpose
+        newClimber = Climber(newWall, height=180, upper_arm_length=40, forearm_length=30,
                           upper_leg_length=45, lower_leg_length=40, torso_height=80,
                           torso_width=50)
 
-        # # Set up a new wall with holds
-        # wall.holds = get_holds_from_image()
-        #
+        routes = generateRoutes(newWall, newClimber)
+        return jsonify({"reply": "Obligatory JSON reply -Ben"})
 
-        #new wall with dense holds
-        wall.holds = generate_dense_holds(wall)
+    #     # # Set up a new wall with holds
+    #     # wall.holds = get_holds_from_image()
+    #     #
 
-        # generate routes
-        routes = generateRoutes(wall, climber)
+    #     #new wall with dense holds
+    #     wall.holds = generate_dense_holds(wall)
 
-        print("Number of routes generated: ", len(routes))
+    #     # generate routes
+    #     routes = generateRoutes(wall, climber)
 
-        for position in routes: print(position.toString())
+    #     print("Number of routes generated: ", len(routes))
 
-        finalPosition = routes[random.randint(1, len(routes))]
+    #     for position in routes: print(position.toString())
 
-        finalRoute = [finalPosition.toString()]
+    #     finalPosition = routes[random.randint(1, len(routes))]
 
-        currentPosition = finalPosition
-        parentPosition = currentPosition.parent_position
-        iteration = 0
-        while (currentPosition.parent_position != None):
-            iteration += 1
-            print("Iteration: ", iteration)
-            print("Current position:", currentPosition.toString())
-            print("Parent position: ", parentPosition.toString())
-            finalRoute.insert(0, currentPosition.parent_position.toString())
-            currentPosition = copy.deepcopy(parentPosition)
-            parentPosition = currentPosition.parent_position
+    #     finalRoute = [finalPosition.toString()]
 
-        # print(finalRoute)
+    #     currentPosition = finalPosition
+    #     parentPosition = currentPosition.parent_position
+    #     iteration = 0
+    #     while (currentPosition.parent_position != None):
+    #         iteration += 1
+    #         print("Iteration: ", iteration)
+    #         print("Current position:", currentPosition.toString())
+    #         print("Parent position: ", parentPosition.toString())
+    #         finalRoute.insert(0, currentPosition.parent_position.toString())
+    #         currentPosition = copy.deepcopy(parentPosition)
+    #         parentPosition = currentPosition.parent_position
 
-        if not routes:
-            raise ValueError("No routes could be generated with the current setup.")
-        return jsonify({"routes": routes}) # best for frontend
+    #     # print(finalRoute)
+
+    #     if not routes:
+    #         raise ValueError("No routes could be generated with the current setup.")
+    #     return jsonify({"routes": routes}) # best for frontend
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

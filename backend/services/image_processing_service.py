@@ -47,8 +47,8 @@ def get_holds_from_image():
 def generate_dense_holds(wall):
     holds = []
     max_reach = 70  # climber's max reach for simplicity
-    vertical_spacing = max_reach * 0.9
-    horizontal_spacing = max_reach * 0.8
+    vertical_spacing = max_reach * 0.5
+    horizontal_spacing = max_reach * 0.5
 
     # Calculate how many holds can fit based on spacing and wall dimensions.
     num_vertical = int(wall.height / vertical_spacing)
