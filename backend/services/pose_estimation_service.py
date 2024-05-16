@@ -33,18 +33,18 @@ def getPositionFromMove(oldPosition, climber, newHold, limbToMove):
     currPosition = copy.deepcopy(oldPosition)
 
     if limbToMove == "left_hand":
-        print("Updating left hand from", currPosition.left_hand, "to", [newHold.yMax[0], newHold.yMax[1]])
+        #print("Updating left hand from", currPosition.left_hand, "to", [newHold.yMax[0], newHold.yMax[1]])
         currPosition.left_hand = [newHold.yMax[0], newHold.yMax[1]]
     elif limbToMove == "right_hand":
-        print("Updating right hand from", currPosition.right_hand, "to", [newHold.yMax[0], newHold.yMax[1]])
+        #print("Updating right hand from", currPosition.right_hand, "to", [newHold.yMax[0], newHold.yMax[1]])
         currPosition.right_hand = [newHold.yMax[0], newHold.yMax[1]]
     elif limbToMove == "left_foot":
-        print("Updating left foot from", currPosition.left_foot, "to", [newHold.yMax[0], newHold.yMax[1]])
+        #print("Updating left foot from", currPosition.left_foot, "to", [newHold.yMax[0], newHold.yMax[1]])
         currPosition.left_foot = [newHold.yMax[0], newHold.yMax[1]]
     elif limbToMove == "right_foot":
-        print("Updating right foot from", currPosition.right_foot, "to", [newHold.yMax[0], newHold.yMax[1]])
+        #print("Updating right foot from", currPosition.right_foot, "to", [newHold.yMax[0], newHold.yMax[1]])
         currPosition.right_foot = [newHold.yMax[0], newHold.yMax[1]]
-    else: print("Error: limbToMove is invalid.")
+    #else: print("Error: limbToMove is invalid.")
 
     if currPosition == oldPosition: print("Current still equals old somehow.")
     # Vectorize position for optimization function (accepts 1D array). By index, the values are:

@@ -31,7 +31,7 @@ def api_generate_routes():
                           torso_width=50)
 
         routes = generateRoutes(newWall, newClimber)
-        return jsonify({"reply": "Obligatory JSON reply -Ben"})
+        return jsonify({"reply": "this is not correctly calling the right function! Better use backend terminal rn. "})
 
     #     # # Set up a new wall with holds
     #     # wall.holds = get_holds_from_image()
