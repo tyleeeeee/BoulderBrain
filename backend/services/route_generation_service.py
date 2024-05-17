@@ -57,8 +57,6 @@ def selectNextMoves(climber, wall, current_position):
           # else: print("getPosition updated the position!")
           
           best_moves.append(newPosition)
-    
-            
 
   else:
     for limb in ['left_hand', 'right_hand', 'left_foot', 'right_foot']:
@@ -87,19 +85,6 @@ def selectNextMoves(climber, wall, current_position):
 
 
 def generateRoutes(wall, climber):
-    # 1. Start with an initial position (feet on ground) and an empty queue of states/positions. #TODO: can this be deleted here? Queues ar enot implemenetd here
-    # 2. Add the initial position to the queue.
-    # 3. For each position in the queue:
-    #     3.1: If the position is a terminal position (at the top of the wall), print the route.
-    # How do we want to store the route, as an attribute of the state maybe?
-    #     3.2: validMoves = getValidMovesFromPosition(current position, valid holds).
-    #     3.3: For every move in validMoves, add getPositionFromMove(move) to queue.
-    #     3.4: Pop from queue
-
-    # "Plant a tree root" every few meters, specifically every 80% of the climber's arm span,
-    # Each site defines where the climber originates in a BFS exploration of possible routes.
-    # All holds that are reachable from the ground should be reachable from at least one initial position.
-
     startPoint = 0
     armSpan = (climber.upper_arm_length + climber.forearm_length) * 2 + climber.torso_width
     startPoint += armSpan / 2
@@ -173,17 +158,6 @@ def generateRoutesRecursive(climber, wall, position, parentPosition):
         #else: print("All the found positions equal the current position!")
       # else: print("Alert: No best move could be selected based on the current criteria.")
 
-        # move_found = False
-        # for limb in ['left_hand', 'right_hand', 'left_foot', 'right_foot']:
-        #     for hold in getReachableHolds(climber, wall, position, limb):
-        #         newPosition = getPositionFromMove(position, climber)
-        #         if newPosition:
-        #             finalPositions += generateRoutesRecursive(climber, wall, newPosition)
-        #             move_found = True
-        #             break  # for now: we break after first successful move to reduce complexity
-        #     if move_found:
-        #         break
-
     # handle case when no moves are possible
     if not finalPositions:
         print("No further moves possible from this position.")
@@ -241,7 +215,7 @@ def getReachableHolds(climber, wall, position, limb):
   return reachable_holds
 
 
-#TODO: delete/move to app.py??
+#TODO: move to app.py?? atm this is used when running the code --> initialize somewhere else!
 wall = Wall(id=1, height=400, width=500) #made it quite larger on purpose
 climber = Climber(wall, height=180, upper_arm_length=40, forearm_length=30,
                           upper_leg_length=45, lower_leg_length=40, torso_height=80,
@@ -256,7 +230,6 @@ wall.holds = generate_dense_holds(wall)
 
 
 # new function to select final routes
-
 def process_final_routes(routes):
     holds_dict = {}
     routes_description_dict = {}
@@ -339,25 +312,3 @@ def filter_routes_by_hold_overlap(holds_dict, overlap_threshold):
 overlap_threshold = 90  # means 90% can be the same, already 85% is too less lol TODO: adjust where? Frontend? Try again when tree grows longer
 valid_routes = filter_routes_by_hold_overlap(holds_dict, overlap_threshold)
 print("Valid Routes:", valid_routes)
-
-
-
-# # we select random route to show
-# finalPosition = routes[random.randint(1, len(routes))]
-# finalRoute = [finalPosition.toString()]
-#
-# # searches through linked structure to get nicely structured output
-# currentPosition = finalPosition
-# parentPosition = currentPosition.parent_position
-# iteration = 0
-# while (currentPosition.parent_position != None):
-#   iteration += 1
-#   print("Iteration: ", iteration)
-#   print("Current position:", currentPosition.toString())
-#   print("Parent position: ", parentPosition.toString())
-#   finalRoute.insert(0, currentPosition.parent_position.toString())
-#   currentPosition = copy.deepcopy(parentPosition)
-#   parentPosition = currentPosition.parent_position
-
-# print(finalRoute)
-
