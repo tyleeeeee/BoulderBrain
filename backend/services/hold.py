@@ -5,5 +5,6 @@ class Hold:
         self.location = location  # should be a 2D array
         self.color = color
         self.end = end
-        self.yMax = yMax # should be a 2D array #TODO: do we need location AND yMax?
+        self.yMax = yMax # should be a 2D array #TODO: use yMax as HoldID everywhere
+
 

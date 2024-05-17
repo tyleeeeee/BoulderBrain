@@ -277,16 +277,14 @@ def process_final_routes(routes):
             }
             route_description.append(iteration_desc)
 
-            # Extract hold positions from current and parent positions and update the set
             holds_set.update(extract_holds(current_position))
-            holds_set.update(extract_holds(current_position.parent_position))
 
             # Move to the parent position to continue the traversal
             current_position = current_position.parent_position
 
         # Store data in dicts
-        holds_dict[route_key] = ", ".join(map(str, holds_set))
-        routes_description_dict[route_key] = list(reversed(route_description)) # TODO: reverse it?
+        holds_dict[route_key] = holds_set
+        routes_description_dict[route_key] = list(route_description) # TODO:  reverse it?
 
     return holds_dict, routes_description_dict
 
@@ -308,8 +306,39 @@ routes = generateRoutes(wall, climber)
 print("Number of routes generated: ", len(routes))
 
 holds_dict, routes_description_dict = process_final_routes(routes)
-#print(holds_dict)
+print(holds_dict)
 #print(routes_description_dict)
+
+
+def filter_routes_by_hold_overlap(holds_dict, overlap_threshold):
+
+    valid_routes = set()
+
+    # Iterate over each route and compare with every other of the routes
+    for route1, holds1 in holds_dict.items():
+        if not holds1:  #skip routes with no holds
+            continue
+        is_valid = True
+        for route2, holds2 in holds_dict.items():
+            if route1 != route2 and holds2:
+                # Calculate % overlap
+                intersection = holds1.intersection(holds2)
+                overlap_percentage = (len(intersection) / len(holds1)) * 100
+
+                # exceeds threshold?
+                if overlap_percentage > overlap_threshold:
+                    print('too much overlap')
+                    is_valid = False
+                    break
+        if is_valid:
+            valid_routes.add(route1)  #add it
+
+    return valid_routes
+
+
+overlap_threshold = 90  # means 90% can be the same, already 85% is too less lol TODO: adjust where? Frontend? Try again when tree grows longer
+valid_routes = filter_routes_by_hold_overlap(holds_dict, overlap_threshold)
+print("Valid Routes:", valid_routes)
 
 
 
@@ -331,3 +360,4 @@ holds_dict, routes_description_dict = process_final_routes(routes)
 #   parentPosition = currentPosition.parent_position
 
 # print(finalRoute)
+
