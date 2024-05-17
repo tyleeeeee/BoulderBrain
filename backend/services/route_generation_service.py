@@ -9,7 +9,8 @@ from .climber import Climber
 import copy
 import random
 import math
-# import matplotlib as plt
+import re
+
 
 # need to define inital position of limbs to calculate distance in reachable area. Setting them to  [-1, -1] means they start at an undefined position on the wall
 def initializePosition(climber, startPoint, wall):
@@ -49,15 +50,13 @@ def selectNextMoves(climber, wall, current_position):
           reachable_holds.sort(key = lambda hold: getattr(hold, 'yMax')[1], reverse=True)
         
           highest_hold = reachable_holds[0]
-          print("Currently, the", limb, "is at", getattr(current_position, limb), "and the hold it's moving to is at", highest_hold.yMax)
+          #print("Currently, the", limb, "is at", getattr(current_position, limb), "and the hold it's moving to is at", highest_hold.yMax)
           newPosition = getPositionFromMove(current_position, climber, highest_hold, limb)
 
           # if newPosition == current_position: print("getPosition returned the same position!")
           # else: print("getPosition updated the position!")
           
           best_moves.append(newPosition)
-    
-            
 
   else:
     for limb in ['left_hand', 'right_hand', 'left_foot', 'right_foot']:
@@ -68,11 +67,11 @@ def selectNextMoves(climber, wall, current_position):
         # Sort moves by height/highest y-value.
         reachable_holds.sort(key = lambda hold: getattr(hold, "yMax")[1], reverse=True)
         highest_hold = reachable_holds[0]
-        print("Currently, the", limb, "is at", getattr(current_position, limb), "and the hold it's moving to is at", highest_hold.yMax)
+        #print("Currently, the", limb, "is at", getattr(current_position, limb), "and the hold it's moving to is at", highest_hold.yMax)
         newPosition = getPositionFromMove(current_position, climber, highest_hold, limb)
-        if newPosition == current_position: 
-           print("getPosition returned the same position!")
-        else: print("getPosition updated the position!")
+        # if newPosition == current_position:
+        #    print("getPosition returned the same position!")
+        # else: print("getPosition updated the position!")
 
         best_moves.append(newPosition)
 
@@ -86,19 +85,6 @@ def selectNextMoves(climber, wall, current_position):
 
 
 def generateRoutes(wall, climber):
-    # 1. Start with an initial position (feet on ground) and an empty queue of states/positions. #TODO: can this be deleted here? Queues ar enot implemenetd here
-    # 2. Add the initial position to the queue.
-    # 3. For each position in the queue:
-    #     3.1: If the position is a terminal position (at the top of the wall), print the route.
-    # How do we want to store the route, as an attribute of the state maybe?
-    #     3.2: validMoves = getValidMovesFromPosition(current position, valid holds).
-    #     3.3: For every move in validMoves, add getPositionFromMove(move) to queue.
-    #     3.4: Pop from queue
-
-    # "Plant a tree root" every few meters, specifically every 80% of the climber's arm span,
-    # Each site defines where the climber originates in a BFS exploration of possible routes.
-    # All holds that are reachable from the ground should be reachable from at least one initial position.
-
     startPoint = 0
     armSpan = (climber.upper_arm_length + climber.forearm_length) * 2 + climber.torso_width
     startPoint += armSpan / 2
@@ -130,7 +116,7 @@ def generateRoutesRecursive(climber, wall, position, parentPosition):
     position.timestep += 1
     # Max depth of the tree is 30 moves.
     if position.timestep >= 6:
-        print("Max depth of the tree is 8 moves.")
+        #print("Max depth of the tree is 8 moves.")
         position.climber = None
 
         return [position]
@@ -167,21 +153,10 @@ def generateRoutesRecursive(climber, wall, position, parentPosition):
       for nextPosition in nextMoves:
         # getPositionFromMove(current_position, climber, highest_hold, limb)
         if (nextPosition != position):
-          print("These positions are not equal!")
+          #print("These positions are not equal!")
           finalPositions = finalPositions + (generateRoutesRecursive(climber, wall, nextPosition, position))
-        else: print("All the found positions equal the current position!")
+        #else: print("All the found positions equal the current position!")
       # else: print("Alert: No best move could be selected based on the current criteria.")
-
-        # move_found = False
-        # for limb in ['left_hand', 'right_hand', 'left_foot', 'right_foot']:
-        #     for hold in getReachableHolds(climber, wall, position, limb):
-        #         newPosition = getPositionFromMove(position, climber)
-        #         if newPosition:
-        #             finalPositions += generateRoutesRecursive(climber, wall, newPosition)
-        #             move_found = True
-        #             break  # for now: we break after first successful move to reduce complexity
-        #     if move_found:
-        #         break
 
     # handle case when no moves are possible
     if not finalPositions:
@@ -232,13 +207,15 @@ def getReachableHolds(climber, wall, position, limb):
       if foot_check(hold.yMax, position, climber, limb): reachable_holds.append(hold)
 
 
-  if not reachable_holds:
-    print("No reachable holds found for the", limb, ".")
-  else:
-    print("Reachable holds are available:", len(reachable_holds))
+  # if not reachable_holds:
+  #   print("No reachable holds found for the", limb, ".")
+  # else:
+  #   print("Reachable holds are available:", len(reachable_holds))
 
   return reachable_holds
 
+
+#TODO: move to app.py?? atm this is used when running the code --> initialize somewhere else!
 wall = Wall(id=1, height=400, width=500) #made it quite larger on purpose
 climber = Climber(wall, height=180, upper_arm_length=40, forearm_length=30,
                           upper_leg_length=45, lower_leg_length=40, torso_height=80,
@@ -251,27 +228,87 @@ wall.holds = get_holds_from_image()
 #new wall with dense holds
 wall.holds = generate_dense_holds(wall)
 
+
+# new function to select final routes
+def process_final_routes(routes):
+    holds_dict = {}
+    routes_description_dict = {}
+
+    for i, route in enumerate(routes):
+        route_key = f"route{i + 1}"  # Unique key for each route
+        holds_set = set()
+        route_description = []
+        current_position = route  # Start with the final position in the route
+        iteration = 0
+
+        while current_position.parent_position is not None:
+            iteration += 1
+            iteration_desc = {
+                "Iteration": iteration,
+                "Current Position": current_position.toString(),
+                "Parent Position": current_position.parent_position.toString()
+            }
+            route_description.append(iteration_desc)
+
+            holds_set.update(extract_holds(current_position))
+
+            # Move to the parent position to continue the traversal
+            current_position = current_position.parent_position
+
+        # Store data in dicts
+        holds_dict[route_key] = holds_set
+        routes_description_dict[route_key] = list(route_description) # TODO:  reverse it?
+
+    return holds_dict, routes_description_dict
+
+def extract_holds(position):
+    # Extract hold coordinates from our position object
+    holds = {
+        (position.left_hand[0], position.left_hand[1]),
+        (position.right_hand[0], position.right_hand[1]),
+        (position.left_foot[0], position.left_foot[1]),
+        (position.right_foot[0], position.right_foot[1])
+    }
+    return holds
+
+###########################################################
 # generate routes
+# TODO: this is where it actually gets called --> need to be moved to app.py
 routes = generateRoutes(wall, climber)
 
 print("Number of routes generated: ", len(routes))
 
-for position in routes: print(position.toString())
+holds_dict, routes_description_dict = process_final_routes(routes)
+print(holds_dict)
+#print(routes_description_dict)
 
-finalPosition = routes[random.randint(1, len(routes))]
 
-finalRoute = [finalPosition.toString()]
+def filter_routes_by_hold_overlap(holds_dict, overlap_threshold):
 
-currentPosition = finalPosition
-parentPosition = currentPosition.parent_position
-iteration = 0
-while (currentPosition.parent_position != None):
-  iteration += 1
-  print("Iteration: ", iteration)
-  print("Current position:", currentPosition.toString())
-  print("Parent position: ", parentPosition.toString())
-  finalRoute.insert(0, currentPosition.parent_position.toString())
-  currentPosition = copy.deepcopy(parentPosition)
-  parentPosition = currentPosition.parent_position
+    valid_routes = set()
 
-# print(finalRoute)
+    # Iterate over each route and compare with every other of the routes
+    for route1, holds1 in holds_dict.items():
+        if not holds1:  #skip routes with no holds
+            continue
+        is_valid = True
+        for route2, holds2 in holds_dict.items():
+            if route1 != route2 and holds2:
+                # Calculate % overlap
+                intersection = holds1.intersection(holds2)
+                overlap_percentage = (len(intersection) / len(holds1)) * 100
+
+                # exceeds threshold?
+                if overlap_percentage > overlap_threshold:
+                    print('too much overlap')
+                    is_valid = False
+                    break
+        if is_valid:
+            valid_routes.add(route1)  #add it
+
+    return valid_routes
+
+
+overlap_threshold = 90  # means 90% can be the same, already 85% is too less lol TODO: adjust where? Frontend? Try again when tree grows longer
+valid_routes = filter_routes_by_hold_overlap(holds_dict, overlap_threshold)
+print("Valid Routes:", valid_routes)
