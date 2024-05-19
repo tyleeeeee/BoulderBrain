@@ -1,4 +1,4 @@
-The code requires Segment Anything from **[Meta AI Research, FAIR](https://ai.facebook.com/research/)**, please install it first.
+The backend code requires Segment Anything from **[Meta AI Research, FAIR](https://ai.facebook.com/research/)**, please install it first.
 
 ## SAM Installation
 
