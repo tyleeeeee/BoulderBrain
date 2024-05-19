@@ -35,53 +35,27 @@ def initializePosition(climber, startPoint, wall):
 def selectNextMoves(climber, wall, current_position):
   best_moves = []
 
-  # If any limbs are not yet placed on the wall, then prioritize placing them on the wall.
-  if min(current_position.left_hand[0], 
-         current_position.right_hand[0], 
-         current_position.left_foot[0], 
-         current_position.right_foot[0]) < 0:
-    
-    for limb in ['left_hand', 'right_hand', 'left_foot', 'right_foot']:
-      if getattr(current_position, limb)[0] < 0:
-        reachable_holds = getReachableHolds(climber, wall, current_position, limb)
+  for limb in ['left_hand', 'right_hand', 'left_foot', 'right_foot']:
 
-        if reachable_holds:
-          # Sort moves by height/highest y-value.
-          reachable_holds.sort(key = lambda hold: getattr(hold, 'yMax')[1], reverse=True)
-        
-          highest_hold = reachable_holds[0]
-          #print("Currently, the", limb, "is at", getattr(current_position, limb), "and the hold it's moving to is at", highest_hold.yMax)
-          newPosition = getPositionFromMove(current_position, climber, highest_hold, limb)
+    reachable_holds = getReachableHolds(climber, wall, current_position, limb)
+    if reachable_holds and limb != current_position.previous_limb:
+      # print("The previous limb was", current_position.previous_limb, "and the current limb is", limb,".")
+      
+      # Sort moves by height/highest y-value.
+      reachable_holds.sort(key = lambda hold: getattr(hold, "yMax")[1], reverse=True)
+      highest_hold = reachable_holds[0]
+      #print("Currently, the", limb, "is at", getattr(current_position, limb), "and the hold it's moving to is at", highest_hold.yMax)
+      newPosition = getPositionFromMove(current_position, climber, highest_hold, limb)
+      newPosition.previous_limb = limb
+      # if newPosition == current_position:
+      #    print("getPosition returned the same position!")
+      # else: print("getPosition updated the position!")
 
-          # if newPosition == current_position: print("getPosition returned the same position!")
-          # else: print("getPosition updated the position!")
-          
-          best_moves.append(newPosition)
+      best_moves.append(newPosition)
 
-  else:
-    for limb in ['left_hand', 'right_hand', 'left_foot', 'right_foot']:
-
-      reachable_holds = getReachableHolds(climber, wall, current_position, limb)
-      if reachable_holds:
-        
-        # Sort moves by height/highest y-value.
-        reachable_holds.sort(key = lambda hold: getattr(hold, "yMax")[1], reverse=True)
-        highest_hold = reachable_holds[0]
-        #print("Currently, the", limb, "is at", getattr(current_position, limb), "and the hold it's moving to is at", highest_hold.yMax)
-        newPosition = getPositionFromMove(current_position, climber, highest_hold, limb)
-        # if newPosition == current_position:
-        #    print("getPosition returned the same position!")
-        # else: print("getPosition updated the position!")
-
-        best_moves.append(newPosition)
-
-  if best_moves: 
-     print("Number of moves we explore next:", len(best_moves))
-     return best_moves
-
-  else:
-    print("No best moves found.")
-    return best_moves
+  if best_moves: print("Number of moves we explore next:", len(best_moves))
+  else: print("No best moves found.")
+  return best_moves
 
 
 def generateRoutes(wall, climber):
@@ -109,13 +83,13 @@ def generateRoutes(wall, climber):
         startPoint += 0.8 * armSpan
     return finalPositions
 
-
 def generateRoutesRecursive(climber, wall, position, parentPosition):
     if (parentPosition != None and position.toString() == parentPosition.toString()): print("Error! Position's parent is itself!!!!!!!!!!!!!!!!!!!!!")
     position.parent_position = parentPosition
     position.timestep += 1
+
     # Max depth of the tree is 30 moves.
-    if position.timestep >= 6:
+    if position.timestep >= 4:
         #print("Max depth of the tree is 8 moves.")
         position.climber = None
 
@@ -133,37 +107,27 @@ def generateRoutesRecursive(climber, wall, position, parentPosition):
     # Array to be returned.
     finalPositions = [position]
 
-    # If any limbs are not placed on the wall already, prioritize finding moves for them.
-    if min(position.left_hand[0], position.right_hand[0], position.left_foot[0], position.right_foot[0]) < 0:
+    # If all limbs are already on the wall, explore moves for all limbs.
+    nextMoves = selectNextMoves(climber, wall, position)
 
-      # Returns an array of positions.
-      nextMoves = selectNextMoves(climber, wall, position)
+    random.shuffle(nextMoves)
 
-      for nextPosition in nextMoves:
-        # getPositionFromMove(current_position, climber, highest_hold, limb)
-        if (nextPosition != position):
-          finalPositions = finalPositions + generateRoutesRecursive(climber, wall, nextPosition, position)
-        else: print("All the found positions equal the current position!")
-      # else: print("Alert: No best move could be selected based on the current criteria.")
+    # To prune the tree, take (at random) at most 2 next moves to explore.
+    shortenedNextMoves = nextMoves[:max(2, len(nextMoves)):]
 
-    else:
-      # If all limbs are already on the wall, explore moves for all limbs.
-      nextMoves = selectNextMoves(climber, wall, position)
-
-      for nextPosition in nextMoves:
-        # getPositionFromMove(current_position, climber, highest_hold, limb)
-        if (nextPosition != position):
-          #print("These positions are not equal!")
-          finalPositions = finalPositions + (generateRoutesRecursive(climber, wall, nextPosition, position))
-        #else: print("All the found positions equal the current position!")
-      # else: print("Alert: No best move could be selected based on the current criteria.")
+    for nextPosition in shortenedNextMoves:
+      # getPositionFromMove(current_position, climber, highest_hold, limb)
+      if (nextPosition != position):
+        #print("These positions are not equal!")
+        finalPositions = finalPositions + (generateRoutesRecursive(climber, wall, nextPosition, position))
+      #else: print("All the found positions equal the current position!")
+    # else: print("Alert: No best move could be selected based on the current criteria.")
 
     # handle case when no moves are possible
     if not finalPositions:
         print("No further moves possible from this position.")
 
     return finalPositions
-
 
 def getReachableHolds(climber, wall, position, limb):
   
@@ -309,6 +273,6 @@ def filter_routes_by_hold_overlap(holds_dict, overlap_threshold):
     return valid_routes
 
 
-overlap_threshold = 30  # means 90% can be the same, already 85% is too less lol TODO: adjust where? Frontend? Try again when tree grows longer
+overlap_threshold = 0  # means 90% can be the same, already 85% is too less lol TODO: adjust where? Frontend? Try again when tree grows longer
 valid_routes = filter_routes_by_hold_overlap(holds_dict, overlap_threshold)
 print("Valid Routes:", valid_routes)
