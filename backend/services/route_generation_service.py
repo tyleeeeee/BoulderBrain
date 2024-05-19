@@ -35,6 +35,8 @@ def initializePosition(climber, startPoint, wall):
 def selectNextMoves(climber, wall, current_position):
   best_moves = []
 
+  # Shuffle the order we explore moves per limb, so that the first next move found is random.
+
   limbs = ['left_hand', 'right_hand', 'left_foot', 'right_foot']
   random.shuffle(limbs)
 
@@ -42,7 +44,7 @@ def selectNextMoves(climber, wall, current_position):
 
     # Once we're deep enough into the tree, we don't explore all successor states; we just choose one at random.
     # To save run time, we interrupt the reachable holds calculations once we have one reachable hold.
-    if current_position.timestep > 6 and best_moves != []: break
+    if current_position.timestep > 2 and best_moves != []: break
 
     reachable_holds = getReachableHolds(climber, wall, current_position, limb)
     if reachable_holds and limb != current_position.previous_limb:
@@ -237,6 +239,11 @@ def process_final_routes(routes):
             # Move to the parent position to continue the traversal
             current_position = current_position.parent_position
 
+        # When the parent position is None, we are at the initial position.
+        # For the initial position, remove all "holds" that are part of the position,
+        # as the hands and feet don't actually start on the wall.
+        holds_set.discard(extract_holds(current_position))
+
         # Store data in dicts
         holds_dict[route_key] = holds_set
         routes_description_dict[route_key] = list(route_description) # TODO:  reverse it?
@@ -271,8 +278,12 @@ def filter_routes_by_hold_overlap(holds_dict, overlap_threshold):
 
     # Iterate over each route and compare with every other of the routes
     for route1, holds1 in holds_dict.items():
-        if not holds1:  #skip routes with no holds
-            continue
+        # Skip routes with no holds.
+        if not holds1: continue
+
+        # Skip routes that don't have a hold near the top wall.
+        if max([hold[1] for hold in holds1]) < 0.9 * wall.height: continue
+
         is_valid = True
         for route2, holds2 in valid_routes.items():
             if route1 != route2 and holds2:
