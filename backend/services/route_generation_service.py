@@ -292,8 +292,8 @@ def filter_routes_by_hold_overlap(holds_dict, overlap_threshold):
         if not holds1:  #skip routes with no holds
             continue
         is_valid = True
-        for route2, holds2 in holds_dict.items():
-            if route1 != route2 and holds2:
+        for holds2 in valid_routes:
+            if holds2:
                 # Calculate % overlap
                 intersection = holds1.intersection(holds2)
                 overlap_percentage = (len(intersection) / len(holds1)) * 100
@@ -309,6 +309,6 @@ def filter_routes_by_hold_overlap(holds_dict, overlap_threshold):
     return valid_routes
 
 
-overlap_threshold = 90  # means 90% can be the same, already 85% is too less lol TODO: adjust where? Frontend? Try again when tree grows longer
+overlap_threshold = 40  # means 90% can be the same, already 85% is too less lol TODO: adjust where? Frontend? Try again when tree grows longer
 valid_routes = filter_routes_by_hold_overlap(holds_dict, overlap_threshold)
 print("Valid Routes:", valid_routes)
