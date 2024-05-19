@@ -89,7 +89,7 @@ def generateRoutesRecursive(climber, wall, position, parentPosition):
     position.timestep += 1
 
     # Max depth of the tree is 30 moves.
-    if position.timestep >= 4:
+    if position.timestep >= 11:
         #print("Max depth of the tree is 8 moves.")
         position.climber = None
 
@@ -249,15 +249,15 @@ print(holds_dict)
 
 def filter_routes_by_hold_overlap(holds_dict, overlap_threshold):
 
-    valid_routes = set()
+    valid_routes = {}
 
     # Iterate over each route and compare with every other of the routes
     for route1, holds1 in holds_dict.items():
         if not holds1:  #skip routes with no holds
             continue
         is_valid = True
-        for holds2 in valid_routes:
-            if holds2:
+        for route2, holds2 in valid_routes.items():
+            if route1 != route2 and holds2:
                 # Calculate % overlap
                 intersection = holds1.intersection(holds2)
                 overlap_percentage = (len(intersection) / len(holds1)) * 100
@@ -268,11 +268,11 @@ def filter_routes_by_hold_overlap(holds_dict, overlap_threshold):
                     is_valid = False
                     break
         if is_valid:
-            valid_routes.add(route1)  #add it
+            valid_routes[route1] = holds1  #add it
 
     return valid_routes
 
 
-overlap_threshold = 0  # means 90% can be the same, already 85% is too less lol TODO: adjust where? Frontend? Try again when tree grows longer
+overlap_threshold = 30  # means 90% can be the same, already 85% is too less lol TODO: adjust where? Frontend? Try again when tree grows longer
 valid_routes = filter_routes_by_hold_overlap(holds_dict, overlap_threshold)
 print("Valid Routes:", valid_routes)
