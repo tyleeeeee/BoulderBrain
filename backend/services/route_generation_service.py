@@ -35,7 +35,14 @@ def initializePosition(climber, startPoint, wall):
 def selectNextMoves(climber, wall, current_position):
   best_moves = []
 
-  for limb in ['left_hand', 'right_hand', 'left_foot', 'right_foot']:
+  limbs = ['left_hand', 'right_hand', 'left_foot', 'right_foot']
+  random.shuffle(limbs)
+
+  for limb in limbs:
+
+    # Once we're deep enough into the tree, we don't explore all successor states; we just choose one at random.
+    # To save run time, we interrupt the reachable holds calculations once we have one reachable hold.
+    if current_position.timestep > 6 and best_moves != []: break
 
     reachable_holds = getReachableHolds(climber, wall, current_position, limb)
     if reachable_holds and limb != current_position.previous_limb:
@@ -54,7 +61,9 @@ def selectNextMoves(climber, wall, current_position):
       best_moves.append(newPosition)
 
   if best_moves: print("Number of moves we explore next:", len(best_moves))
-  else: print("No best moves found.")
+  else: 
+     print("No best moves found.")
+     print("Max height reached:", max(current_position.left_hand[1],current_position.right_hand[1]))
   return best_moves
 
 
@@ -88,20 +97,24 @@ def generateRoutesRecursive(climber, wall, position, parentPosition):
     position.parent_position = parentPosition
     position.timestep += 1
 
-    # Max depth of the tree is 30 moves.
-    if position.timestep >= 11:
-        #print("Max depth of the tree is 8 moves.")
-        position.climber = None
-
-        return [position]
-
     # If any hand (or foot) is within 10% of the height of the wall from the top, then declare the
     # route finished.
 
     if max(position.left_hand[1], position.right_hand[1], position.left_foot[1],
            position.right_foot[1]) >= wall.height * 0.9:
-        print("Hand/foot is within 10% of the height from the top of the wall, so the route is finished. ")
+        print("Hand/foot is within 10 percent of the height from the top of the wall, so the route is finished.")
+        print("Moves required:", position.timestep)
         position.climber = None
+        return [position]
+
+    maxDepth = 13
+    # Max depth of the tree is 30 moves.
+    if position.timestep >= maxDepth:
+        print("Max depth of the tree is", maxDepth, "moves.")
+        print("Max height reached:", max(position.left_hand[1], position.right_hand[1]))
+        print("90 percent of wall height:", wall.height * 0.9)
+        position.climber = None
+
         return [position]
 
     # Array to be returned.
@@ -113,7 +126,12 @@ def generateRoutesRecursive(climber, wall, position, parentPosition):
     random.shuffle(nextMoves)
 
     # To prune the tree, take (at random) at most 2 next moves to explore.
-    shortenedNextMoves = nextMoves[:max(2, len(nextMoves)):]
+    shortenedNextMoves = nextMoves[:min(2, len(nextMoves)):]
+
+    # If we're deep enough in the tree, then just choose one move (branching factor 1).
+    # if position.timestep > 1: shortenedNextMoves = nextMoves[:min(1, len(nextMoves)):]
+       # print("We're deep enough that we just choose a next move at random.")
+       # print("Moves we're actually exploring:", len(shortenedNextMoves))
 
     for nextPosition in shortenedNextMoves:
       # getPositionFromMove(current_position, climber, highest_hold, limb)
@@ -273,6 +291,6 @@ def filter_routes_by_hold_overlap(holds_dict, overlap_threshold):
     return valid_routes
 
 
-overlap_threshold = 30  # means 90% can be the same, already 85% is too less lol TODO: adjust where? Frontend? Try again when tree grows longer
+overlap_threshold = 50  # means 90% can be the same, already 85% is too less lol TODO: adjust where? Frontend? Try again when tree grows longer
 valid_routes = filter_routes_by_hold_overlap(holds_dict, overlap_threshold)
 print("Valid Routes:", valid_routes)
