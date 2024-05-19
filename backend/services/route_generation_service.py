@@ -180,7 +180,7 @@ def getReachableHolds(climber, wall, position, limb):
 
 
 #TODO: move to app.py?? atm this is used when running the code --> initialize somewhere else!
-wall = Wall(id=1, height=400, width=500) #made it quite larger on purpose
+wall = Wall(id=1, height=350, width=500) #made it quite larger on purpose
 climber = Climber(wall, height=180, upper_arm_length=40, forearm_length=30,
                           upper_leg_length=45, lower_leg_length=40, torso_height=80,
                           torso_width=50)
