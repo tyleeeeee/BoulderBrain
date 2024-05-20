@@ -74,7 +74,7 @@ def selectNextMoves(climber, wall, current_position):
 def generateRoutes(wall, climber):
     startPoint = 0
     armSpan = (climber.upper_arm_length + climber.forearm_length) * 2 + climber.torso_width
-    startPoint += armSpan / 2
+    startPoint += armSpan / 5
 
     # finalPositions is an array of all final positions, one per generated route.
     # Each position points to its parent position, which can be used to create
@@ -114,7 +114,7 @@ def generateRoutesRecursive(climber, wall, position, parentPosition):
         position.climber = None
         return [position]
 
-    maxDepth = 13
+    maxDepth = 30
     # Max depth of the tree is 30 moves.
     if position.timestep >= maxDepth:
         # print("Max depth of the tree is", maxDepth, "moves.")

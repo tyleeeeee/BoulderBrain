@@ -4,7 +4,7 @@ import numpy as np
 import os
 import scipy as sp
 
-def output_route(holds, holds_dict, routes, wall_path):
+def output_route(holds, holds_dict, routes, wall_path, directory):
     i = 0
     # print(wall_path)
     for rid in routes:
@@ -31,7 +31,7 @@ def output_route(holds, holds_dict, routes, wall_path):
         # 0 as graysacle, otherwise as colored
         bg = np.where(bg, img, gray_img_3channel)
         # cv2.imwrite(f'backend/services/files/route{i}.jpg', bg)
-        cv2.imwrite(f'services/files/route{i}.jpg', bg)
+        cv2.imwrite(f'{directory}/route{i}.jpg', bg)
         # print("Route found: " + str(route))
         avg_diff = total_diff/len(route)
         avg_diff = avg_diff.round(2)
