@@ -137,8 +137,8 @@ def ExtractBoundingBox(image_path, directory, wid):
     results = model.predict(image_path, max_det=200, iou=0.005, conf=0.008)
 
     # Save the results
-    results_path = os.path.join(directory, "yolo_world_result.jpg")
-    results[0].save(results_path)
+    # results_path = os.path.join(directory, "yolo_world_result.jpg")
+    # results[0].save(results_path)
 
     img = cv2.imread(image_path)
 
@@ -302,25 +302,25 @@ def getHolds_manually(image_path, masks, directory, click_points, count, wid):
 
 
 # main() function
-def get_holds_main(wall):
+def get_holds_main(wall, image_path, holds_path, files_path):
     # print(os.getcwd())    
-    parser = argparse.ArgumentParser()
+    # parser = argparse.ArgumentParser()
     # parser.add_argument('--image_path', help='path/to/image', type=str, default='backend/services/files/example_wall.jpg')
     # parser.add_argument('--holds_path', help='path/to/holds', type=str, default='backend/services/files/holds')
     # parser.add_argument('--files_path', help='path/to/files', type=str, default='backend/services/files')
-    parser.add_argument('--image_path', help='path/to/image', type=str, default='services/files/example_wall.jpg')
-    parser.add_argument('--holds_path', help='path/to/holds', type=str, default='services/files/holds')
-    parser.add_argument('--files_path', help='path/to/files', type=str, default='services/files')
-    parser.add_argument('--wid', help='wall id', type=int, default=0)
-    parser.add_argument('--h_w', help='height of wall', type=int, default=350)
-    args = parser.parse_args()
-    image_path = args.image_path
-    holds_path = args.holds_path
-    wid = args.wid
-    h_w = args.h_w
+    # parser.add_argument('--image_path', help='path/to/image', type=str, default='services/files/example_wall.jpg')
+    # parser.add_argument('--holds_path', help='path/to/holds', type=str, default='services/files/holds')
+    # parser.add_argument('--files_path', help='path/to/files', type=str, default='services/files')
+    # parser.add_argument('--wid', help='wall id', type=int, default=0)
+    # parser.add_argument('--h_w', help='height of wall', type=int, default=350)
+    # args = parser.parse_args()
+    # image_path = args.image_path
+    # holds_path = args.holds_path
+    wid = wall.id
+    h_w = wall.height
 
     # Directory where the file will be saved
-    directory = args.files_path
+    directory = files_path
 
     # Check if the directory exists, and create it if it does not
     if not os.path.exists(directory):
@@ -356,10 +356,29 @@ def get_holds_main(wall):
         count = 0
         # print("Manually adding holds...")
         # example wall
-        click_points = [(1149, 807), (1146, 602), (996, 552), (916, 451), (872, 390), (890, 80), (459, 8), (352, 40), 
-                        (110, 40), (121, 510), (146, 428), (333, 339), (358, 544), (423, 595), (497, 559), (349, 673), 
-                        (443, 850), (581, 564), (789, 604), (880, 485), (919, 661), (1073, 679), (822, 857)]
+        # click_points = [(1149, 807), (1146, 602), (996, 552), (916, 451), (872, 390), (890, 80), (459, 8), (352, 40), 
+        #                 (110, 40), (121, 510), (146, 428), (333, 339), (358, 544), (423, 595), (497, 559), (349, 673), 
+        #                 (443, 850), (581, 564), (789, 604), (880, 485), (919, 661), (1073, 679), (822, 857)]
 
+        # 340_0
+        # click_points = [(56, 67), (171, 166), (16, 226), (18, 312), (197, 405), (138, 581), (74, 763), (273, 697), 
+        #                 (372, 572), (488, 386), (783, 150), (742, 296), (685, 432), (597, 536), (611, 685), (502, 782), 
+        #                 (518, 888), (606, 1019), (390, 1000), (271, 857), (194, 1028), (126, 882), (129, 1120), (34, 1258), 
+        #                 (265, 1170), (191, 1393), (313, 1421), (443, 1291), (450, 1189), (581, 1239), (1052, 1316), (794, 764), 
+        #                 (914, 656), (1002, 764), (1048, 527), (816, 863), (1028, 948), (1028, 992), (1069, 1014), (973, 1394)]
+        
+        # 338_0
+        # click_points = [(260, 76), (401, 333), (88, 238), (127, 391), (126, 851), (103, 679), (293, 575), (414, 633), 
+        #                 (528, 563), (535, 210), (311, 299), (606, 322), (697, 262), (892, 467), (1086, 331), (641, 465), 
+        #                 (582, 749), (514, 848), (390, 876), (371, 1028), (468, 949), (611, 1231), (445, 1382), (763, 1293), 
+        #                 (834, 1065), (807, 768), (1064, 816), (991, 802)]
+        
+        # 339_0
+        click_points = [(73, 629), (427, 396), (547, 341), (658, 282), (706, 201), (878, 144), (831, 416), (670, 436), 
+                        (779, 552), (829, 599), (1011, 516), (894, 766), (659, 705), (442, 647), (586, 600), (363, 781),
+                        (572, 874), (670, 951), (813, 859), (862, 885), (1027, 848), (786, 1070), (759, 1021), (507, 1015), 
+                        (285, 975), (282, 1135), (452, 1219), (513, 1367), (681, 1264), (866, 1226), (93, 1253), (129, 381)]
+        
         # wall1 yellow holds VB
         # click_points = [(63, 192), (182, 462), (423, 342), (508, 397), (631, 740), (691, 933)]
         # wall1 green holds V0

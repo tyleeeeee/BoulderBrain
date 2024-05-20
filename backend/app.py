@@ -29,16 +29,18 @@ def api_generate_routes():
     try:
 
         # Initialize Wall and Climber
-        image_path = 'services/files/example_wall.jpg'
+        # image_path = 'services/files/example_wall.jpg'
+        image_path = 'services/files/338_0.jpg'
         print("Loading wall and climber details...")
-        wall = Wall(id=1, height=350, width=500, image_path=image_path) #made it quite larger on purpose
+        wall = Wall(id=2, height=450, width=300, image_path=image_path) #made it quite larger on purpose
         climber = Climber(wall, height=180, upper_arm_length=40, forearm_length=30,
                           upper_leg_length=45, lower_leg_length=40, torso_height=80,
                           torso_width=50)
 
         # Set up a new wall with holds
-        # wall.holds = get_holds_from_image(wall)
-        wall.holds,holds_map = get_holds_main(wall)
+        holds_path = f'services/result{wall.id}/holds'
+        files_path = f'services/result{wall.id}'
+        wall.holds,holds_map = get_holds_main(wall, image_path, holds_path, files_path)
 
 
         print("Generating routes...")
@@ -55,7 +57,7 @@ def api_generate_routes():
         valid_routes_list = list(valid_routes)
         print(f"Total of {len(valid_routes_list)} valid routes.")
 
-        output_route(wall.holds, holds_map, valid_routes, wall.image_path)
+        output_route(wall.holds, holds_map, valid_routes, wall.image_path, files_path)
         
         # return jsonify(valid_routes)
         return jsonify({'Valid Routes': valid_routes})

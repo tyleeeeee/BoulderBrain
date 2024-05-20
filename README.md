@@ -20,6 +20,15 @@ or
  !wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
 ```
 
+## Execute the code
+
+
+Please input the sample image path, wall information(e.g. id, height, width) in app.py file first.
+```
+cd backend
+python3 app.py
+```
+
 ```
 @article{kirillov2023segany,
   title={Segment Anything},
