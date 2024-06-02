@@ -58,12 +58,21 @@ def selectNextMoves(climber, wall, current_position):
       # move, not a high move. 
 
       if 'left_foot' in limb and current_position.left_foot[1] == 0:
-         reachable_holds.sort(key = lambda hold: getattr(hold, "yMax")[1], reverse=False)
-         print("Left foot is still on the ground.")
+        reachable_holds.sort(key = lambda hold: getattr(hold, "yMax")[1], reverse=False)
+        print("Left foot is still on the ground.")
+        # If the other foot is already on the hold, then take it out of consideration.
+        # (We don't want both feet to have to start on the same foothold as their first move.)
+        if current_position.right_foot == getattr(reachable_holds[0], "yMax"):
+          reachable_holds.pop(0)
+
 
       elif 'right_foot' in limb and current_position.right_foot[1] == 0:
-         reachable_holds.sort(key = lambda hold: getattr(hold, "yMax")[1], reverse=False)
-         print("Right foot is still on the ground")
+        reachable_holds.sort(key = lambda hold: getattr(hold, "yMax")[1], reverse=False)
+        print("Right foot is still on the ground.")
+        # If the other foot is already on the hold, then take it out of consideration.
+        # (We don't want both feet to have to start on the same foothold as their first move.)
+        if current_position.left_foot == getattr(reachable_holds[0], "yMax"):
+          reachable_holds.pop(0)
 
       highest_hold = reachable_holds[0]
       #print("Currently, the", limb, "is at", getattr(current_position, limb), "and the hold it's moving to is at", highest_hold.yMax)
