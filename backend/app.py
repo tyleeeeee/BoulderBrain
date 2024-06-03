@@ -1,6 +1,7 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-from services.image_processing_service import get_holds_from_image, get_holds_main
+# from services.image_processing_service import get_holds_from_image
+from services.image_processing_service import get_holds_main
 # from services.image_processing_service import generate_dense_holds, get_holds_from_image
 from services.route_generation_service import generateRoutes, process_final_routes, filter_routes_by_hold_overlap
 from services.reachable_foot_area import calc_knee_angle, calc_hold_angle, calc_hip_angle, calc_max_hip_angle
@@ -30,15 +31,16 @@ def api_generate_routes():
 
         # Initialize Wall and Climber
         # image_path = 'services/files/example_wall.jpg'
-        image_path = 'services/files/338_0.jpg'
+        image_path = 'services/files/860.jpg'
         print("Loading wall and climber details...")
-        wall = Wall(id=2, height=450, width=300, image_path=image_path) #made it quite larger on purpose
-        climber = Climber(wall, height=180, upper_arm_length=40, forearm_length=30,
+        wall = Wall(id=4, height=350, width=500, image_path=image_path) #made it quite larger on purpose
+        climber = Climber(wall, height=170, upper_arm_length=40, forearm_length=30,
                           upper_leg_length=45, lower_leg_length=40, torso_height=80,
                           torso_width=50)
 
         # Set up a new wall with holds
         holds_path = f'services/result{wall.id}/holds'
+        holds_img_path = f'services/result{wall.id}/holds_img'
         files_path = f'services/result{wall.id}'
         wall.holds,holds_map = get_holds_main(wall, image_path, holds_path, files_path)
 
@@ -68,3 +70,4 @@ def api_generate_routes():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
