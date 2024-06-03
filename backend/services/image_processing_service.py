@@ -408,7 +408,8 @@ def get_holds_main(wall, image_path, holds_path, files_path):
                 difficulty_1, difficulty_2, difficulty_3, difficulty_4, difficulty_5, difficulty_6, difficulty_7, difficulty_8 = 2, 2, 2, 2, 2, 2, 2, 2
                    
         # holds.append(sp.load_npz(os.path.join(holds_path, file)).toarray())
-        Holds.append(Hold(wall, path, "blue1", False, [ymax_world[0].round(2), ymax_world[1].round(2)], 
+        difficulty = np.random.randint(1,7,1)[0]
+        Holds.append(Hold(wall, path, "blue1", False, [ymax_world[0].round(2), ymax_world[1].round(2)], difficulty, 
                           difficulty_1, difficulty_2, difficulty_3, difficulty_4, difficulty_5, difficulty_6, difficulty_7, difficulty_8, 
                           i))
         # Holds.append(Hold(dummy_wall, os.path.join(holds_path, file), "blue1", False,  [ymax_world[0], ymax_world[1]]))
