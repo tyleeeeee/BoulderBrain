@@ -33,10 +33,11 @@ def api_generate_routes():
         # image_path = 'services/files/example_wall.jpg'
         image_path = 'services/files/860.jpg'
         print("Loading wall and climber details...")
-        wall = Wall(id=4, height=350, width=500, image_path=image_path) #made it quite larger on purpose
-        climber = Climber(wall, height=170, upper_arm_length=40, forearm_length=30,
-                          upper_leg_length=45, lower_leg_length=40, torso_height=80,
-                          torso_width=50)
+
+        wall = Wall(id=4, height=350, width=450, image_path=image_path) #made it quite larger on purpose
+        climber = Climber(wall, height=180, upper_arm_length=40*(10/9), forearm_length=30*(10/9),
+                          upper_leg_length=45*(10/9), lower_leg_length=40*(10/9), torso_height=80*(10/9),
+                          torso_width=50*(10/9))
 
         # Set up a new wall with holds
         holds_path = f'services/result{wall.id}/holds'

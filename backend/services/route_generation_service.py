@@ -39,7 +39,7 @@ def selectNextMoves(climber, wall, current_position):
   # Shuffle the order we explore moves per limb, so that the first next move found is random.
 
   limbs = ['left_hand', 'right_hand', 'left_foot', 'right_foot']
-  random.shuffle(limbs)
+  random.shuffle(limbs) # Shuffle the order we explore options for each limb.
 
   for limb in limbs:
 
@@ -53,13 +53,34 @@ def selectNextMoves(climber, wall, current_position):
       
       # Sort moves by height/highest y-value.
       reachable_holds.sort(key = lambda hold: getattr(hold, "yMax")[1], reverse=True)
+
+      # If we're exploring foot moves, and the foot is still on the ground, then prioritize a low
+      # move, not a high move. 
+
+      if 'left_foot' in limb and current_position.left_foot[1] == 0:
+        reachable_holds.sort(key = lambda hold: getattr(hold, "yMax")[1], reverse=False)
+
+        # If the other foot is already on the hold, then take it out of consideration.
+        # (We don't want both feet to have to start on the same foothold as their first move.)
+        if current_position.right_foot == getattr(reachable_holds[0], "yMax"):
+          reachable_holds.pop(0)
+
+
+      elif 'right_foot' in limb and current_position.right_foot[1] == 0:
+        reachable_holds.sort(key = lambda hold: getattr(hold, "yMax")[1], reverse=False)
+
+        # If the other foot is already on the hold, then take it out of consideration.
+        # (We don't want both feet to have to start on the same foothold as their first move.)
+        if current_position.left_foot == getattr(reachable_holds[0], "yMax"):
+          reachable_holds.pop(0)
+
       highest_hold = reachable_holds[0]
       #print("Currently, the", limb, "is at", getattr(current_position, limb), "and the hold it's moving to is at", highest_hold.yMax)
       newPosition = getPositionFromMove(current_position, climber, highest_hold, limb)
       newPosition.previous_limb = limb
-      # if newPosition == current_position:
-      #    print("getPosition returned the same position!")
-      # else: print("getPosition updated the position!")
+
+      
+
 
       best_moves.append(newPosition)
 
@@ -87,13 +108,14 @@ def generateRoutes(wall, climber):
         # print("Tree root (route starting point): ", startPoint)
         initialPosition.timestep = 0
 
-        # Most important for the initial position is the location of the torso, which defines the reachable holds.
-        # Hands and feet have negative values to represent that they begin "nowhere" on the wall.
+        print("Starting from", startPoint, "cm from the left of the image.")
+
+        # Most important for the initial position is the location of the torso, which defines the initially reachable holds.
 
         # Explore the full tree of generated routes with generateRoutesRecursive, and append it to the results.
         finalPositions = finalPositions + generateRoutesRecursive(climber, wall, initialPosition, None)
 
-        startPoint += 0.8 * armSpan
+        startPoint += 0.5 * armSpan
 
     
 
