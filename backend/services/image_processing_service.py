@@ -1,23 +1,7 @@
 from .hold import Hold
 from .wall import Wall
 
-# import os
-
-
-
 import argparse
-import cv2
-import numpy as np
-
-# from items.climber import Climber
-# from items.hold import Hold
-# from items.position import Position
-# from items.route import Route
-# from items.wall import Wall
-
-# from hold import Hold
-# from wall import Wall
-
 from ultralytics import YOLOWorld
 from ultralytics import SAM
 from segment_anything import sam_model_registry, SamAutomaticMaskGenerator, SamPredictor
@@ -30,6 +14,7 @@ import os
 import matplotlib.pyplot as plt
 import cv2
 import sys
+import csv
 
 holds = []
 
@@ -183,7 +168,8 @@ def SegmentAnything(image_path, directory):
 
     device = "cuda"
     sam = sam_model_registry[model_type](checkpoint=sam_checkpoint).to(device=device)
-    mask_generator = SamAutomaticMaskGenerator(sam)
+    # mask_generator = SamAutomaticMaskGenerator(sam)
+    mask_generator = SamAutomaticMaskGenerator(model=sam, points_per_side=40)
 
     # Read the image from the path
     image= cv2.imread(image_path)
@@ -193,10 +179,10 @@ def SegmentAnything(image_path, directory):
     output_mask = mask_generator.generate(image)
     # print(output_mask)
 
-    # _,axes = plt.subplots(1,2, figsize=(16,16))
-    # axes[0].imshow(image)
-    # image_path = os.path.join(directory, "sam_result.jpg")
-    # show_output(output_mask, axes[1], image_path)
+    _,axes = plt.subplots(1,2, figsize=(16,16))
+    axes[0].imshow(image)
+    image_path = os.path.join(directory, "sam_result.jpg")
+    show_output(output_mask, axes[1], image_path)
 
     masks = mask_generator.generate(image)
     # store the masks in the directory
@@ -265,7 +251,7 @@ def getHolds(image_path, bboxes, masks, directory, wid):
         # if(flag == False):
         #     print(f"False: {bbox[0], bbox[1], bbox[2], bbox[3]}")
             
-    # print(f"Total {count} items detected in the image.")
+    print(f"Total {count} items auto-detected in the image.")
     # plt.imshow(image)
     path = os.path.join(directory, f"{wid}_holds.jpg")
     cv2.imwrite(path, image)
@@ -302,20 +288,10 @@ def getHolds_manually(image_path, masks, directory, click_points, count, wid):
 
 
 # main() function
+# holds_path = f'services/result{wall.id}/holds'
+# files_path = f'services/result{wall.id}'
 def get_holds_main(wall, image_path, holds_path, files_path):
-    # print(os.getcwd())    
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('--image_path', help='path/to/image', type=str, default='backend/services/files/example_wall.jpg')
-    # parser.add_argument('--holds_path', help='path/to/holds', type=str, default='backend/services/files/holds')
-    # parser.add_argument('--files_path', help='path/to/files', type=str, default='backend/services/files')
-    # parser.add_argument('--image_path', help='path/to/image', type=str, default='services/files/example_wall.jpg')
-    # parser.add_argument('--holds_path', help='path/to/holds', type=str, default='services/files/holds')
-    # parser.add_argument('--files_path', help='path/to/files', type=str, default='services/files')
-    # parser.add_argument('--wid', help='wall id', type=int, default=0)
-    # parser.add_argument('--h_w', help='height of wall', type=int, default=350)
-    # args = parser.parse_args()
-    # image_path = args.image_path
-    # holds_path = args.holds_path
+
     wid = wall.id
     h_w = wall.height
 
@@ -327,20 +303,12 @@ def get_holds_main(wall, image_path, holds_path, files_path):
         os.makedirs(directory)
 
     image = cv2.imread(image_path)
+    count = 0
 
-    # # test the conversion function
-    # print(image.shape)
-    # print('(884, 0)', convert_image_to_world(image, h_w, 884, 0))
-    # print('(442, 0)', convert_image_to_world(image, h_w, 442, 0))
-    # print('(0, 0)', convert_image_to_world(image, h_w, 0, 0))
-    # print('(0, 600)', convert_image_to_world(image, h_w, 0, 600))
-    # print('(0, 1179)', convert_image_to_world(image, h_w, 0, 1179))
-    # print('(884, 1179)', convert_image_to_world(image, h_w, 884, 1179))
-    
     if not os.path.exists(holds_path):
 
-        print("\nExtracting bounding boxes...")
-        bbox = ExtractBoundingBox(image_path, directory, wid)
+        # print("\nExtracting bounding boxes...")
+        # bbox = ExtractBoundingBox(image_path, directory, wid)
 
         print("\nSegmenting the image...")
         if(torch.cuda.is_available()):
@@ -349,12 +317,12 @@ def get_holds_main(wall, image_path, holds_path, files_path):
             print("CUDA is not available, please enable CUDA to run the model")
     
         print("Getting holds...")
-        holds, count = getHolds(image_path, bbox, masks, directory, wid)
+        # holds, count = getHolds(image_path, bbox, masks, directory, wid)
         
         ######################################################################################################
         # manually add holds
-        count = 0
-        # print("Manually adding holds...")
+        # count = 0
+        print("Manually adding holds...")
         # example wall
         # click_points = [(1149, 807), (1146, 602), (996, 552), (916, 451), (872, 390), (890, 80), (459, 8), (352, 40), 
         #                 (110, 40), (121, 510), (146, 428), (333, 339), (358, 544), (423, 595), (497, 559), (349, 673), 
@@ -374,27 +342,26 @@ def get_holds_main(wall, image_path, holds_path, files_path):
         #                 (834, 1065), (807, 768), (1064, 816), (991, 802)]
         
         # 339_0
-        click_points = [(73, 629), (427, 396), (547, 341), (658, 282), (706, 201), (878, 144), (831, 416), (670, 436), 
-                        (779, 552), (829, 599), (1011, 516), (894, 766), (659, 705), (442, 647), (586, 600), (363, 781),
-                        (572, 874), (670, 951), (813, 859), (862, 885), (1027, 848), (786, 1070), (759, 1021), (507, 1015), 
-                        (285, 975), (282, 1135), (452, 1219), (513, 1367), (681, 1264), (866, 1226), (93, 1253), (129, 381)]
+        # click_points = [(73, 629), (427, 396), (547, 341), (658, 282), (706, 201), (878, 144), (831, 416), (670, 436), 
+        #                 (779, 552), (829, 599), (1011, 516), (894, 766), (659, 705), (442, 647), (586, 600), (363, 781),
+        #                 (572, 874), (670, 951), (813, 859), (862, 885), (1027, 848), (786, 1070), (759, 1021), (507, 1015), 
+        #                 (285, 975), (282, 1135), (452, 1219), (513, 1367), (681, 1264), (866, 1226), (93, 1253), (129, 381)]
         
-        # wall1 yellow holds VB
-        # click_points = [(63, 192), (182, 462), (423, 342), (508, 397), (631, 740), (691, 933)]
-        # wall1 green holds V0
-        # click_points = [(31, 891), (37, 577), (199, 528), (231, 433), (264, 369), (426, 279), (426, 152), (196, 729), (201, 788)]
-        # # wall2 yellow holds VB
-        # click_points = [(412, 73), (452, 158), (638, 266), (656, 379), (608, 518), (561, 610), (508, 662), (265, 638), (367, 983)]
-        # # wall2 orange holds V0
-        # click_points = [(514, 855), (348, 795), (447, 600), (306, 497), (390, 407), (433, 323), (532, 234), (488, 59), (632, 610)]
-        # # wall3 green holds V0
-        # click_points = [(466, 826), (140, 813), (207, 567), (280, 409), (466, 367), (460, 307), (611, 239), (556, 120)]
-        # # wall3 white holds V0
-        # click_points = [(165, 176), (206, 251), (353, 430), (619, 340), (701, 605), (581, 795), (232, 971)]
-        image_path = os.path.join(directory, f"{wid}_holds.jpg")
+        # 860
+        # click_points = [(383, 646), (458, 544), (579, 571), (875, 631), (870, 665), (873, 1061), (1058, 1013), (1109, 354), (1264, 279), (1298, 120), (1421, 32)]
+        click_points = [(181, 145), (346, 74), (395, 152), (285, 248), (217, 398), (226, 529), (183, 681), (291, 629), 
+                        (269, 853), (264, 1061), (431, 939), (584, 1054), (569, 849), (432, 741), (392, 653), (540, 678), 
+                        (461, 547), (485, 391), (322, 446), (374, 346), (488, 239), (609, 131), (544, 299), (622, 273), 
+                        (662, 419), (593, 572), (622, 672), (623, 723), (714, 621), (786, 785), (805, 1028), (879, 1068), 
+                        (907, 919), (1068, 1031), (1089, 861), (986, 692), (881, 639), (833, 462), (732, 92), (807, 125), 
+                        (944, 83), (869, 252), (1002, 282), (944, 412), (1046, 528), (1110, 360), (1125, 124), (1319, 88), 
+                        (1430, 32), (1411, 181), (1266, 262), (1205, 565), (1347, 700), (1445, 524), (1326, 829), (1433, 979), 
+                        (1236, 1059), (1216, 898), (1082, 725), (1107, 703)]
+
+        # image_path = os.path.join(directory, f"{wid}_holds.jpg")
         holds, count =  getHolds_manually(image_path, masks, directory, click_points, count, wid)
 
-        # print(f"Total {count} items detected in the image.")
+        print(f"Total {count} items detected in the image.")
         ######################################################################################################
         
         # # store the holds in the directory as npz files
@@ -404,60 +371,50 @@ def get_holds_main(wall, image_path, holds_path, files_path):
         for i in range(len(holds)):
             # location = holds[i].location npz file
             sp.save_npz(os.path.join(output_dir, (str(i)+".npz")), sp.csr_matrix(holds[i]))
-        
 
-        # print("-1-1-")
 
-        # dummy_wall = Wall(id=1, height=400, width=500)
-        Holds = []
-        i=0
-        for file in os.listdir(holds_path):
-            if file.endswith(".npz"):
-                mask = sp.load_npz(os.path.join(holds_path, file)).toarray()
-                # m = mask*255
-                # cv2.imwrite(f"{i}.jpg", m)
-                ymax = find_ymax(mask) # image coordinate
-                ymax_world = convert_image_to_world(image, h_w, ymax[0], ymax[1])
-                # ymax_world = ymax_world.toarray()
-                # choose a random difficulty in range(0,1)
-                # difficulty = np.random.uniform(0,1)
-                difficulty = np.random.randint(1,7,1)[0]
-                # holds.append(sp.load_npz(os.path.join(holds_path, file)).toarray())
-                Holds.append(Hold(wall, os.path.join(holds_path, file), "blue1", False, [ymax_world[0].round(2), ymax_world[1].round(2)], difficulty, i))
-                # Holds.append(Hold(dummy_wall, os.path.join(holds_path, file), "blue1", False, [ymax_world[0], ymax_world[1]]))
-                i += 1
-        print(f"Total {len(Holds)} holds extracted from the image.")
-        # for hold in Holds:
-        #     print(hold.yMax)
-    
-    
-    else:
-        # print("Holds already exist in the directory.")
-        # load the holds from the directory
-        # dummy_wall = Wall(id=1, height=400, width=500)
-        Holds = []
-        i=0
-        for file in os.listdir(holds_path):
-            if file.endswith(".npz"):
-                mask = sp.load_npz(os.path.join(holds_path, file)).toarray()
-                # m = mask*255
-                # cv2.imwrite(f"{i}.jpg", m)
-                ymax = find_ymax(mask)
-                # print(ymax)
-                ymax_world = convert_image_to_world(image, h_w, ymax[0], ymax[1])
+    # load the holds from the directory
+    Holds = []
+    for i in range(len(os.listdir(holds_path))):
+        path = os.path.join(holds_path, f'{i}.npz')
+        mask = sp.load_npz(path).toarray()
+        # m = mask*255
+        # cv2.imwrite(f"{i}.jpg", m)
+        ymax = find_ymax(mask)
+        # print(ymax)
+        ymax_world = convert_image_to_world(image, h_w, ymax[0], ymax[1])
+        # print(f"[{ymax_world[0]}, {ymax_world[1]}],")
                 
-                # choose a random difficulty in range(0,1)
-                # difficulty = np.random.uniform(0,1)
-                difficulty = np.random.randint(1,7,1)[0]
-                # holds.append(sp.load_npz(os.path.join(holds_path, file)).toarray())
-                Holds.append(Hold(wall, os.path.join(holds_path, file), "blue1", False, [ymax_world[0].round(2), ymax_world[1].round(2)], difficulty, i))
-                # Holds.append(Hold(dummy_wall, os.path.join(holds_path, file), "blue1", False,  [ymax_world[0], ymax_world[1]]))
-                i += 1
-        print(f"Total {len(Holds)} holds extracted from the image.")
-        # for hold in Holds:
-        #     print(hold.yMax)
-    
-    # print("-2-2-")3
+        # assign difficulty base on difficulty table
+        difficulty_path = os.path.join(directory, "difficulties.csv")
+        print(i)
+        if not os.path.exists(difficulty_path):
+            difficulty_1, difficulty_2, difficulty_3, difficulty_4, difficulty_5, difficulty_6, difficulty_7, difficulty_8 = 1, 1, 1, 1, 1, 1, 1, 1
+        else:
+            d = []
+            with open(difficulty_path, newline='') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    if int(row['id']) == i:  
+                        # print(row)
+                        for key, value in row.items():
+                            # print(key, value)
+                            if(key != 'id'):
+                                d.append(int(value))
+            csvfile.close()
+            if(len(d) == 8):
+                difficulty_1, difficulty_2, difficulty_3, difficulty_4, difficulty_5, difficulty_6, difficulty_7, difficulty_8 = d
+            else:
+                difficulty_1, difficulty_2, difficulty_3, difficulty_4, difficulty_5, difficulty_6, difficulty_7, difficulty_8 = 2, 2, 2, 2, 2, 2, 2, 2
+                   
+        # holds.append(sp.load_npz(os.path.join(holds_path, file)).toarray())
+        Holds.append(Hold(wall, path, "blue1", False, [ymax_world[0].round(2), ymax_world[1].round(2)], 
+                          difficulty_1, difficulty_2, difficulty_3, difficulty_4, difficulty_5, difficulty_6, difficulty_7, difficulty_8, 
+                          i))
+        # Holds.append(Hold(dummy_wall, os.path.join(holds_path, file), "blue1", False,  [ymax_world[0], ymax_world[1]]))
+        print(difficulty_1, difficulty_2, difficulty_3, difficulty_4, difficulty_5, difficulty_6, difficulty_7, difficulty_8)
+    print(f"Total {len(Holds)} holds extracted from the image.")
+
     Holds_dict = {}
     for h in Holds:
         Holds_dict[tuple(h.yMax)] = h.id
