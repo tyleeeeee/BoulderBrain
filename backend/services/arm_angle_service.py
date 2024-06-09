@@ -2,9 +2,9 @@ import math
 from scipy.spatial import distance
 import numpy as np
 import sympy as sp
-from climber import Climber
-from wall import Wall
-# from .position import Position
+from .climber import Climber
+from .wall import Wall
+from .position import Position
 
 def calc_elbow_location(shoulder_location, hold_location, climber, side="right"):
   
@@ -68,5 +68,3 @@ wall = Wall(id=4, height=350, width=450, image_path=image_path)
 climber = Climber(wall, height=180, upper_arm_length=35*(9/9), forearm_length=35*(9/9),
                           upper_leg_length=45*(9/9), lower_leg_length=40*(9/9), torso_height=80*(9/9),
                           torso_width=50*(9/9))
-
-print(calc_grip_angle([70, 100], [105, 100], climber, "right"))
