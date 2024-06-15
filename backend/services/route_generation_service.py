@@ -111,7 +111,7 @@ def selectNextMoves(climber, wall, current_position):
         elif newPosition.angle <= 360:
           newPosition.difficulty = highest_hold.difficulty_right
         
-        print("Angle:", newPosition.angle, ", Difficulty:", newPosition.difficulty)
+        # print("Angle:", int(newPosition.angle), ", Difficulty:", newPosition.difficulty)
           
       best_moves.append(newPosition)
 
