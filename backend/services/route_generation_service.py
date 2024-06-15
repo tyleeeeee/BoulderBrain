@@ -261,12 +261,15 @@ def getReachableHolds(climber, wall, position, limb):
 
 # new function to select final routes
 def process_final_routes(routes):
+    print("Processing final routes!")
     holds_dict = {}
+    route_difficulties_dict = {}
     routes_description_dict = {}
 
     for i, route in enumerate(routes):
         route_key = f"route{i + 1}"  # Unique key for each route
         holds_set = set()
+        move_difficulties = []
         route_description = []
         current_position = route  # Start with the final position in the route
         iteration = 0
@@ -274,13 +277,17 @@ def process_final_routes(routes):
         while current_position.parent_position is not None:
             iteration += 1
             iteration_desc = {
-                "Iteration": iteration,
-                "Current Position": current_position.toString(),
-                "Parent Position": current_position.parent_position.toString()
+              "Iteration": iteration,
+              "Current Position": current_position.toString(),
+              "Parent Position": current_position.parent_position.toString()
             }
             route_description.append(iteration_desc)
 
             holds_set.update(extract_holds(current_position))
+
+            # Track the difficulty of the position if it's created by a hand move.
+            if current_position.hand_or_foot == 'hand':
+              move_difficulties.append(current_position.difficulty)
 
             # Move to the parent position to continue the traversal
             current_position = current_position.parent_position
@@ -293,8 +300,12 @@ def process_final_routes(routes):
         # Store data in dicts
         holds_dict[route_key] = holds_set
         routes_description_dict[route_key] = list(route_description) # TODO:  reverse it?
+        route_difficulties_dict[route_key] = 8
+        if len(move_difficulties) > 0: 
+           route_difficulties_dict[route_key] = sum(move_difficulties) / len(move_difficulties)
+        # print(route_difficulties_dict[route_key])
 
-    return holds_dict, routes_description_dict
+    return holds_dict, routes_description_dict, route_difficulties_dict
 
 def extract_holds(position):
     # Extract hold coordinates from our position object
