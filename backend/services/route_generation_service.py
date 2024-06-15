@@ -2,6 +2,7 @@
 from .pose_estimation_service import getPositionFromMove
 from .image_processing_service import get_holds_from_image
 # from .image_processing_service import generate_dense_holds, get_holds_from_image
+from .arm_angle_service import calc_elbow_location, calc_grip_angle
 from .reachable_foot_area import foot_check
 from scipy.spatial import distance
 from .position import Position
@@ -79,9 +80,39 @@ def selectNextMoves(climber, wall, current_position):
       newPosition = getPositionFromMove(current_position, climber, highest_hold, limb)
       newPosition.previous_limb = limb
 
-      
+      if 'foot' in limb: newPosition.hand_or_foot = 'foot'
 
+      # If the move is a hand move, then calculate the grip angle and associated difficulty of the move.
+      else: 
+        newPosition.hand_or_foot = 'hand'
+        if 'left_hand' in limb:
+          newPosition.angle = calc_grip_angle(current_position.left_shoulder, highest_hold.yMax, climber, 'left')
+        else: 
+          newPosition.angle = calc_grip_angle(current_position.left_shoulder, highest_hold.yMax, climber, 'left')
 
+        # From the grip angle, calculate the associated difficulty.
+
+        if newPosition.angle <= 22.5:
+          newPosition.difficulty = highest_hold.difficulty_right
+        elif newPosition.angle <= 67.5:
+          newPosition.difficulty = highest_hold.difficulty_top_right
+        elif newPosition.angle <= 112.5:
+          newPosition.difficulty = highest_hold.difficulty_top
+        elif newPosition.angle <= 157.5:
+          newPosition.difficulty = highest_hold.difficulty_top_left
+        elif newPosition.angle <= 202.5:
+          newPosition.difficulty = highest_hold.difficulty_left
+        elif newPosition.angle <= 247.5:
+          newPosition.difficulty = highest_hold.difficulty_bottom_left
+        elif newPosition.angle <= 292.5:
+          newPosition.difficulty = highest_hold.difficulty_bottom
+        elif newPosition.angle <= 337.5:
+          newPosition.difficulty = highest_hold.difficulty_bottom_right
+        elif newPosition.angle <= 360:
+          newPosition.difficulty = highest_hold.difficulty_right
+        
+        print("Angle:", newPosition.angle, ", Difficulty:", newPosition.difficulty)
+          
       best_moves.append(newPosition)
 
   # if best_moves: 
