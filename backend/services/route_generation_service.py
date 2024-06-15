@@ -319,15 +319,25 @@ def extract_holds(position):
 
 ###########################################################
 
+def sort_routes_by_difficulty(route_difficulties, holds_dict):
+  # Sorts the entries of holds_dict from easiest to hardest, so that filter_routes_by_hold_overlap
+  # evaluates the easiest routes first.
+
+  return None
+   
 
 
-
-def filter_routes_by_hold_overlap(holds_dict, overlap_threshold, wall):
+def filter_routes_by_hold_overlap(holds_dict, overlap_threshold, wall, route_difficulties_dict):
+    
+    # Next two lines are from ChatGPT. Creates a version of holds_dict sorted by route difficulty.
+    sorted_keys = sorted(route_difficulties_dict, key=route_difficulties_dict.get)
+    sorted_holds_dict = {key: holds_dict[key] for key in sorted_keys}
 
     valid_routes = {}
+    valid_difficulties = {}
 
     # Iterate over each route and compare with every other of the routes
-    for route1, holds1 in holds_dict.items():
+    for route1, holds1 in sorted_holds_dict.items():
         # Skip routes with no holds.
         if not holds1: continue
 
@@ -347,8 +357,9 @@ def filter_routes_by_hold_overlap(holds_dict, overlap_threshold, wall):
                     is_valid = False
                     break
         if is_valid:
-            valid_routes[route1] = holds1  #add it
+            valid_routes[route1] = holds1 #add it
+            valid_difficulties[route1] = route_difficulties_dict[route1]
 
-    return valid_routes
+    return valid_routes, valid_difficulties
 
 
