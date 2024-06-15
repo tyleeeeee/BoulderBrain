@@ -18,7 +18,10 @@ class Position:
                  reachable_holds_right_foot = [], 
                  reachable_positions = [], 
                  start = False, end = False,
-                 previous_limb = None):
+                 previous_limb = None,
+                 hand_or_foot = "hand",
+                 angle = 0,
+                 difficulty = 8):
         self.timestep = timestep  # depth in search tree
         self.climber = climber
         self.parent_position = parent_position  # to trace back path
@@ -49,6 +52,18 @@ class Position:
 
         # Tracks the last limb to move, which brought the climber's pose into this position.
         self.previous_limb = previous_limb
+
+        # Tracks if previous_limb is hand or foot
+        self.hand_or_foot = hand_or_foot
+
+        # Tracks the grip angle if it's a hand move, stays 0 by default for a foot move.
+        self.angle = angle
+
+        # Tracks the associated difficulty of the move based on grip angle, stays 8 by default for a foot move.
+        self.difficulty = difficulty
+        
+
+
 
     def toString(self):
         return f"Left Hand: {self.left_hand}, Left Shoulder: {self.left_shoulder}, Left Hip: {self.left_hip}, Left Foot: {self.left_foot}, Right Hand: {self.right_hand}, Right Shoulder: {self.right_shoulder}, Right Hip: {self.right_hip}, Right Foot: {self.right_foot}"
