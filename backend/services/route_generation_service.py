@@ -161,8 +161,8 @@ def generateRoutesRecursive(climber, wall, position, parentPosition):
     # route finished.
 
     if max(position.left_hand[1], position.right_hand[1], position.left_foot[1],
-           position.right_foot[1]) >= wall.height * 0.9:
-        # print("Hand/foot is within 10 percent of the height from the top of the wall, so the route is finished.")
+           position.right_foot[1]) >= wall.height * 0.8:
+        # print("Hand/foot is within 20 percent of the height from the top of the wall, so the route is finished.")
         # print("Moves required:", position.timestep)
         position.climber = None
         return [position]
