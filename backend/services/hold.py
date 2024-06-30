@@ -1,5 +1,5 @@
 class Hold:
-    def __init__(self, wall, location, color, end, yMax, difficulty, difficulty_1, difficulty_2, difficulty_3, difficulty_4, difficulty_5, difficulty_6, difficulty_7, difficulty_8, id):
+    def __init__(self, wall, location, color, end, yMax, difficulty, difficulty_right, difficulty_top_right, difficulty_top, difficulty_top_left, difficulty_left, difficulty_bottom_left, difficulty_bottom, difficulty_bottom_right, id):
         
         self.wall = wall #this way we enforce a wall object to be connected to a hold
         self.location = location  # should be a 2D array
@@ -7,14 +7,14 @@ class Hold:
         self.end = end
         self.yMax = yMax # should be a 2D array #TODO: use yMax as HoldID everywhere
         self.difficulty = difficulty
-        self.difficulty_1 = difficulty_1
-        self.difficulty_2 = difficulty_2
-        self.difficulty_3 = difficulty_3
-        self.difficulty_4 = difficulty_4
-        self.difficulty_5 = difficulty_5
-        self.difficulty_6 = difficulty_6
-        self.difficulty_7 = difficulty_7
-        self.difficulty_8 = difficulty_8
+        self.difficulty_right = difficulty_right
+        self.difficulty_top_right = difficulty_top_right
+        self.difficulty_top = difficulty_top
+        self.difficulty_top_left = difficulty_top_left
+        self.difficulty_left = difficulty_left
+        self.difficulty_bottom_left = difficulty_bottom_left
+        self.difficulty_bottom = difficulty_bottom
+        self.difficulty_bottom_right = difficulty_bottom_right
 
         self.id = id
 

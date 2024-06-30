@@ -4,7 +4,7 @@ import numpy as np
 import os
 import scipy as sp
 
-def output_route(holds, holds_dict, routes, wall_path, directory):
+def output_route(holds, holds_dict, routes, difficulties, wall_path, directory):
     i = 0
     # print(wall_path)
     for rid in routes:
@@ -35,7 +35,8 @@ def output_route(holds, holds_dict, routes, wall_path, directory):
         # print("Route found: " + str(route))
         avg_diff = total_diff/len(route)
         avg_diff = avg_diff.round(2)
-        print("Difficulty: " + str(avg_diff))
+        print("Difficulty using the old system (one value per hold): " + str(avg_diff))
+        print("Difficulty using the new system (grip-angle-dependent):", difficulties[rid])
     
 
 # if __name__ == '__main__':

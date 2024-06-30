@@ -2,6 +2,7 @@
 from .pose_estimation_service import getPositionFromMove
 from .image_processing_service import get_holds_from_image
 # from .image_processing_service import generate_dense_holds, get_holds_from_image
+from .arm_angle_service import calc_elbow_location, calc_grip_angle
 from .reachable_foot_area import foot_check
 from scipy.spatial import distance
 from .position import Position
@@ -79,9 +80,39 @@ def selectNextMoves(climber, wall, current_position):
       newPosition = getPositionFromMove(current_position, climber, highest_hold, limb)
       newPosition.previous_limb = limb
 
-      
+      if 'foot' in limb: newPosition.hand_or_foot = 'foot'
 
+      # If the move is a hand move, then calculate the grip angle and associated difficulty of the move.
+      else: 
+        newPosition.hand_or_foot = 'hand'
+        if 'left_hand' in limb:
+          newPosition.angle = calc_grip_angle(current_position.left_shoulder, highest_hold.yMax, climber, 'left')
+        else: 
+          newPosition.angle = calc_grip_angle(current_position.left_shoulder, highest_hold.yMax, climber, 'left')
 
+        # From the grip angle, calculate the associated difficulty.
+
+        if newPosition.angle <= 22.5:
+          newPosition.difficulty = highest_hold.difficulty_right
+        elif newPosition.angle <= 67.5:
+          newPosition.difficulty = highest_hold.difficulty_top_right
+        elif newPosition.angle <= 112.5:
+          newPosition.difficulty = highest_hold.difficulty_top
+        elif newPosition.angle <= 157.5:
+          newPosition.difficulty = highest_hold.difficulty_top_left
+        elif newPosition.angle <= 202.5:
+          newPosition.difficulty = highest_hold.difficulty_left
+        elif newPosition.angle <= 247.5:
+          newPosition.difficulty = highest_hold.difficulty_bottom_left
+        elif newPosition.angle <= 292.5:
+          newPosition.difficulty = highest_hold.difficulty_bottom
+        elif newPosition.angle <= 337.5:
+          newPosition.difficulty = highest_hold.difficulty_bottom_right
+        elif newPosition.angle <= 360:
+          newPosition.difficulty = highest_hold.difficulty_right
+        
+        # print("Angle:", int(newPosition.angle), ", Difficulty:", newPosition.difficulty)
+          
       best_moves.append(newPosition)
 
   # if best_moves: 
@@ -130,8 +161,8 @@ def generateRoutesRecursive(climber, wall, position, parentPosition):
     # route finished.
 
     if max(position.left_hand[1], position.right_hand[1], position.left_foot[1],
-           position.right_foot[1]) >= wall.height * 0.9:
-        # print("Hand/foot is within 10 percent of the height from the top of the wall, so the route is finished.")
+           position.right_foot[1]) >= wall.height * 0.8:
+        # print("Hand/foot is within 20 percent of the height from the top of the wall, so the route is finished.")
         # print("Moves required:", position.timestep)
         position.climber = None
         return [position]
@@ -230,12 +261,15 @@ def getReachableHolds(climber, wall, position, limb):
 
 # new function to select final routes
 def process_final_routes(routes):
+    print("Processing final routes!")
     holds_dict = {}
+    route_difficulties_dict = {}
     routes_description_dict = {}
 
     for i, route in enumerate(routes):
         route_key = f"route{i + 1}"  # Unique key for each route
         holds_set = set()
+        move_difficulties = []
         route_description = []
         current_position = route  # Start with the final position in the route
         iteration = 0
@@ -243,13 +277,17 @@ def process_final_routes(routes):
         while current_position.parent_position is not None:
             iteration += 1
             iteration_desc = {
-                "Iteration": iteration,
-                "Current Position": current_position.toString(),
-                "Parent Position": current_position.parent_position.toString()
+              "Iteration": iteration,
+              "Current Position": current_position.toString(),
+              "Parent Position": current_position.parent_position.toString()
             }
             route_description.append(iteration_desc)
 
             holds_set.update(extract_holds(current_position))
+
+            # Track the difficulty of the position if it's created by a hand move.
+            if current_position.hand_or_foot == 'hand':
+              move_difficulties.append(current_position.difficulty)
 
             # Move to the parent position to continue the traversal
             current_position = current_position.parent_position
@@ -262,8 +300,12 @@ def process_final_routes(routes):
         # Store data in dicts
         holds_dict[route_key] = holds_set
         routes_description_dict[route_key] = list(route_description) # TODO:  reverse it?
+        route_difficulties_dict[route_key] = 8
+        if len(move_difficulties) > 0: 
+           route_difficulties_dict[route_key] = sum(move_difficulties) / len(move_difficulties)
+        # print(route_difficulties_dict[route_key])
 
-    return holds_dict, routes_description_dict
+    return holds_dict, routes_description_dict, route_difficulties_dict
 
 def extract_holds(position):
     # Extract hold coordinates from our position object
@@ -277,15 +319,25 @@ def extract_holds(position):
 
 ###########################################################
 
+def sort_routes_by_difficulty(route_difficulties, holds_dict):
+  # Sorts the entries of holds_dict from easiest to hardest, so that filter_routes_by_hold_overlap
+  # evaluates the easiest routes first.
+
+  return None
+   
 
 
-
-def filter_routes_by_hold_overlap(holds_dict, overlap_threshold, wall):
+def filter_routes_by_hold_overlap(holds_dict, overlap_threshold, wall, route_difficulties_dict):
+    
+    # Next two lines are from ChatGPT. Creates a version of holds_dict sorted by route difficulty.
+    sorted_keys = sorted(route_difficulties_dict, key=route_difficulties_dict.get)
+    sorted_holds_dict = {key: holds_dict[key] for key in sorted_keys}
 
     valid_routes = {}
+    valid_difficulties = {}
 
     # Iterate over each route and compare with every other of the routes
-    for route1, holds1 in holds_dict.items():
+    for route1, holds1 in sorted_holds_dict.items():
         # Skip routes with no holds.
         if not holds1: continue
 
@@ -305,8 +357,9 @@ def filter_routes_by_hold_overlap(holds_dict, overlap_threshold, wall):
                     is_valid = False
                     break
         if is_valid:
-            valid_routes[route1] = holds1  #add it
+            valid_routes[route1] = holds1 #add it
+            valid_difficulties[route1] = route_difficulties_dict[route1]
 
-    return valid_routes
+    return valid_routes, valid_difficulties
 
 

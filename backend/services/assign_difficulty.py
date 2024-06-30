@@ -49,9 +49,9 @@ def assign_difficulty(image_path, holds_path, holds_img_path, files_path):
 if __name__ == '__main__':
 
     image_path = 'backend/services/files/860.jpg'
-    holds_path = f'backend/services/result4/holds'
-    holds_img_path = f'backend/services/result4/holds_img'
-    files_path = f'backend/services/result4'
+    holds_path = f'backend/services/result6/holds'
+    holds_img_path = f'backend/services/result6/holds_img'
+    files_path = f'backend/services/result6'
 
     # i = int(input("Enter hold id: "))
     # assign_difficulty(image_path, holds_path, holds_img_path, files_path, i)

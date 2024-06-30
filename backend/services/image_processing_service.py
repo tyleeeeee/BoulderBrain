@@ -389,7 +389,7 @@ def get_holds_main(wall, image_path, holds_path, files_path):
         difficulty_path = os.path.join(directory, "difficulties.csv")
         print(i)
         if not os.path.exists(difficulty_path):
-            difficulty_1, difficulty_2, difficulty_3, difficulty_4, difficulty_5, difficulty_6, difficulty_7, difficulty_8 = 1, 1, 1, 1, 1, 1, 1, 1
+            difficulty_right, difficulty_top_right, difficulty_top, difficulty_top_left, difficulty_left, difficulty_bottom_left, difficulty_bottom, difficulty_bottom_right = 1, 1, 1, 1, 1, 1, 1, 1
         else:
             d = []
             with open(difficulty_path, newline='') as csvfile:
@@ -403,17 +403,17 @@ def get_holds_main(wall, image_path, holds_path, files_path):
                                 d.append(int(value))
             csvfile.close()
             if(len(d) == 8):
-                difficulty_1, difficulty_2, difficulty_3, difficulty_4, difficulty_5, difficulty_6, difficulty_7, difficulty_8 = d
+                difficulty_right, difficulty_top_right, difficulty_top, difficulty_top_left, difficulty_left, difficulty_bottom_left, difficulty_bottom, difficulty_bottom_right = d
             else:
-                difficulty_1, difficulty_2, difficulty_3, difficulty_4, difficulty_5, difficulty_6, difficulty_7, difficulty_8 = 2, 2, 2, 2, 2, 2, 2, 2
+                difficulty_right, difficulty_top_right, difficulty_top, difficulty_top_left, difficulty_left, difficulty_bottom_left, difficulty_bottom, difficulty_bottom_right = 2, 2, 2, 2, 2, 2, 2, 2
                    
         # holds.append(sp.load_npz(os.path.join(holds_path, file)).toarray())
         difficulty = np.random.randint(1,7,1)[0]
         Holds.append(Hold(wall, path, "blue1", False, [ymax_world[0].round(2), ymax_world[1].round(2)], difficulty, 
-                          difficulty_1, difficulty_2, difficulty_3, difficulty_4, difficulty_5, difficulty_6, difficulty_7, difficulty_8, 
+                          difficulty_right, difficulty_top_right, difficulty_top, difficulty_top_left, difficulty_left, difficulty_bottom_left, difficulty_bottom, difficulty_bottom_right, 
                           i))
         # Holds.append(Hold(dummy_wall, os.path.join(holds_path, file), "blue1", False,  [ymax_world[0], ymax_world[1]]))
-        print(difficulty_1, difficulty_2, difficulty_3, difficulty_4, difficulty_5, difficulty_6, difficulty_7, difficulty_8)
+        print(difficulty_right, difficulty_top_right, difficulty_top, difficulty_top_left, difficulty_left, difficulty_bottom_left, difficulty_bottom, difficulty_bottom_right)
     print(f"Total {len(Holds)} holds extracted from the image.")
 
     Holds_dict = {}
