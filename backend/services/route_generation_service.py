@@ -130,7 +130,7 @@ def generateRoutesRecursive(climber, wall, position, parentPosition):
     # route finished.
 
     if max(position.left_hand[1], position.right_hand[1], position.left_foot[1],
-           position.right_foot[1]) >= wall.height * 0.9:
+           position.right_foot[1]) >= wall.height * 0.6:
         # print("Hand/foot is within 10 percent of the height from the top of the wall, so the route is finished.")
         # print("Moves required:", position.timestep)
         position.climber = None
@@ -290,7 +290,7 @@ def filter_routes_by_hold_overlap(holds_dict, overlap_threshold, wall):
         if not holds1: continue
 
         # Skip routes that don't have a hold near the top wall.
-        if max([hold[1] for hold in holds1]) < 0.9 * wall.height: continue
+        if max([hold[1] for hold in holds1]) < 0.6 * wall.height: continue
 
         is_valid = True
         for route2, holds2 in valid_routes.items():

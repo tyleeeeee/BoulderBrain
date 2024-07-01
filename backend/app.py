@@ -9,7 +9,6 @@ from services.output_processing import output_route
 from services.climber import Climber
 from services.wall import Wall
 
-
 import random
 import copy
 
@@ -31,13 +30,13 @@ def api_generate_routes():
 
         # Initialize Wall and Climber
         # image_path = 'services/files/example_wall.jpg'
-        image_path = 'services/files/860.jpg'
+        image_path = 'services/files/wall10.jpg'
         print("Loading wall and climber details...")
 
-        wall = Wall(id=4, height=350, width=450, image_path=image_path) #made it quite larger on purpose
-        climber = Climber(wall, height=180, upper_arm_length=40*(10/9), forearm_length=30*(10/9),
-                          upper_leg_length=45*(10/9), lower_leg_length=40*(10/9), torso_height=80*(10/9),
-                          torso_width=50*(10/9))
+        wall = Wall(id=10, height=350, width=200, image_path=image_path) #made it quite larger on purpose
+        climber = Climber(wall, height=160, upper_arm_length=25, forearm_length=20,
+                          upper_leg_length=40, lower_leg_length=40, torso_height=40,
+                          torso_width=30)
 
         # Set up a new wall with holds
         holds_path = f'services/result{wall.id}/holds'
