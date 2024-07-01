@@ -168,21 +168,21 @@ def SegmentAnything(image_path, directory):
 
     device = "cuda"
     sam = sam_model_registry[model_type](checkpoint=sam_checkpoint).to(device=device)
-    # mask_generator = SamAutomaticMaskGenerator(sam)
-    mask_generator = SamAutomaticMaskGenerator(model=sam, points_per_side=40)
+    mask_generator = SamAutomaticMaskGenerator(sam)
+    # mask_generator = SamAutomaticMaskGenerator(model=sam, points_per_side=40)
 
     # Read the image from the path
     image= cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     # Generate segmentation mask
-    output_mask = mask_generator.generate(image)
+    # output_mask = mask_generator.generate(image)
     # print(output_mask)
 
-    _,axes = plt.subplots(1,2, figsize=(16,16))
-    axes[0].imshow(image)
-    image_path = os.path.join(directory, "sam_result.jpg")
-    show_output(output_mask, axes[1], image_path)
+    # _,axes = plt.subplots(1,2, figsize=(16,16))
+    # axes[0].imshow(image)
+    # image_path = os.path.join(directory, "sam_result.jpg")
+    # show_output(output_mask, axes[1], image_path)
 
     masks = mask_generator.generate(image)
     # store the masks in the directory
@@ -316,47 +316,30 @@ def get_holds_main(wall, image_path, holds_path, files_path):
         else:
             print("CUDA is not available, please enable CUDA to run the model")
     
-        print("Getting holds...")
+        # print("Getting holds...")
         # holds, count = getHolds(image_path, bbox, masks, directory, wid)
         
         ######################################################################################################
         # manually add holds
         # count = 0
         print("Manually adding holds...")
-        # example wall
-        # click_points = [(1149, 807), (1146, 602), (996, 552), (916, 451), (872, 390), (890, 80), (459, 8), (352, 40), 
-        #                 (110, 40), (121, 510), (146, 428), (333, 339), (358, 544), (423, 595), (497, 559), (349, 673), 
-        #                 (443, 850), (581, 564), (789, 604), (880, 485), (919, 661), (1073, 679), (822, 857)]
+        
+        
+        # click_points = [(728, 315), (586, 259), (619, 307), (625, 373), (872, 244), (1036, 141), (935, 360), (874, 383), 
+        #                 (821, 472), (809, 499), (683, 501), (560, 380), (861, 543), (979, 583), (987, 678), (988, 802), 
+        #                 (923, 679), (863, 678), (746, 678), (684, 680), (563, 687), (379, 568), (641, 774), (677, 860), 
+        #                 (927, 796), (930, 867), (989, 915), (704, 1069), (456, 980), (327, 632), (152, 632), (217, 706), 
+        #                 (334, 686), (334, 810), (335, 861), (216, 803), (159, 740), (39, 758), (103, 864), (162, 934), 
+        #                 (53, 990), (171, 1098), (295, 1049), (222, 979), (340, 988), (386, 915), (464, 1042), (399, 1142), 
+        #                 (171, 1217), (237, 1262), (213, 1324), (274, 1337), (458, 1212), (505, 1334), (739, 1332), (855, 1401), 
+        #                 (907, 1335), (924, 1208), (1000, 1152), (1007, 1062), (867, 965), (1050, 1409)]
 
-        # 340_0
-        # click_points = [(56, 67), (171, 166), (16, 226), (18, 312), (197, 405), (138, 581), (74, 763), (273, 697), 
-        #                 (372, 572), (488, 386), (783, 150), (742, 296), (685, 432), (597, 536), (611, 685), (502, 782), 
-        #                 (518, 888), (606, 1019), (390, 1000), (271, 857), (194, 1028), (126, 882), (129, 1120), (34, 1258), 
-        #                 (265, 1170), (191, 1393), (313, 1421), (443, 1291), (450, 1189), (581, 1239), (1052, 1316), (794, 764), 
-        #                 (914, 656), (1002, 764), (1048, 527), (816, 863), (1028, 948), (1028, 992), (1069, 1014), (973, 1394)]
-        
-        # 338_0
-        # click_points = [(260, 76), (401, 333), (88, 238), (127, 391), (126, 851), (103, 679), (293, 575), (414, 633), 
-        #                 (528, 563), (535, 210), (311, 299), (606, 322), (697, 262), (892, 467), (1086, 331), (641, 465), 
-        #                 (582, 749), (514, 848), (390, 876), (371, 1028), (468, 949), (611, 1231), (445, 1382), (763, 1293), 
-        #                 (834, 1065), (807, 768), (1064, 816), (991, 802)]
-        
-        # 339_0
-        # click_points = [(73, 629), (427, 396), (547, 341), (658, 282), (706, 201), (878, 144), (831, 416), (670, 436), 
-        #                 (779, 552), (829, 599), (1011, 516), (894, 766), (659, 705), (442, 647), (586, 600), (363, 781),
-        #                 (572, 874), (670, 951), (813, 859), (862, 885), (1027, 848), (786, 1070), (759, 1021), (507, 1015), 
-        #                 (285, 975), (282, 1135), (452, 1219), (513, 1367), (681, 1264), (866, 1226), (93, 1253), (129, 381)]
-        
-        # 860
-        # click_points = [(383, 646), (458, 544), (579, 571), (875, 631), (870, 665), (873, 1061), (1058, 1013), (1109, 354), (1264, 279), (1298, 120), (1421, 32)]
-        click_points = [(181, 145), (346, 74), (395, 152), (285, 248), (217, 398), (226, 529), (183, 681), (291, 629), 
-                        (269, 853), (264, 1061), (431, 939), (584, 1054), (569, 849), (432, 741), (392, 653), (540, 678), 
-                        (461, 547), (485, 391), (322, 446), (374, 346), (488, 239), (609, 131), (544, 299), (622, 273), 
-                        (662, 419), (593, 572), (622, 672), (623, 723), (714, 621), (786, 785), (805, 1028), (879, 1068), 
-                        (907, 919), (1068, 1031), (1089, 861), (986, 692), (881, 639), (833, 462), (732, 92), (807, 125), 
-                        (944, 83), (869, 252), (1002, 282), (944, 412), (1046, 528), (1110, 360), (1125, 124), (1319, 88), 
-                        (1430, 32), (1411, 181), (1266, 262), (1205, 565), (1347, 700), (1445, 524), (1326, 829), (1433, 979), 
-                        (1236, 1059), (1216, 898), (1082, 725), (1107, 703)]
+        click_points = [(130, 645), (82, 1299), (65, 1631), (115, 1916), (274, 1290), (269, 969), (344, 94), (462, 461),
+                        (631, 113), (482, 773), (695, 1083), (453, 1218), (642, 1440), (581, 1657), (951, 1237), (970, 801), 
+                        (1374, 130), (1548, 155), (1539, 363), (1666, 711), (1331, 849), (1524, 1127), (1792, 1107), (1737, 1304), 
+                        (1518, 1377), (1406, 1251), (1078, 1702), (1049, 1936), (1816, 2227), (1802, 1939), (1801, 1588), (1948, 1463), 
+                        (1980, 1720)]
+
 
         # image_path = os.path.join(directory, f"{wid}_holds.jpg")
         holds, count =  getHolds_manually(image_path, masks, directory, click_points, count, wid)
@@ -387,7 +370,7 @@ def get_holds_main(wall, image_path, holds_path, files_path):
                 
         # assign difficulty base on difficulty table
         difficulty_path = os.path.join(directory, "difficulties.csv")
-        print(i)
+        # print(i)
         if not os.path.exists(difficulty_path):
             difficulty_right, difficulty_top_right, difficulty_top, difficulty_top_left, difficulty_left, difficulty_bottom_left, difficulty_bottom, difficulty_bottom_right = 1, 1, 1, 1, 1, 1, 1, 1
         else:
@@ -413,7 +396,7 @@ def get_holds_main(wall, image_path, holds_path, files_path):
                           difficulty_right, difficulty_top_right, difficulty_top, difficulty_top_left, difficulty_left, difficulty_bottom_left, difficulty_bottom, difficulty_bottom_right, 
                           i))
         # Holds.append(Hold(dummy_wall, os.path.join(holds_path, file), "blue1", False,  [ymax_world[0], ymax_world[1]]))
-        print(difficulty_right, difficulty_top_right, difficulty_top, difficulty_top_left, difficulty_left, difficulty_bottom_left, difficulty_bottom, difficulty_bottom_right)
+        # print(difficulty_1, difficulty_2, difficulty_3, difficulty_4, difficulty_5, difficulty_6, difficulty_7, difficulty_8)
     print(f"Total {len(Holds)} holds extracted from the image.")
 
     Holds_dict = {}
@@ -510,3 +493,4 @@ def get_holds_from_image(dummy_wall):
 #         if x <= wall.width: holds.append(Hold(wall, [x, y], "green", False, [x, y + 5]))
 
 #     return holds
+    

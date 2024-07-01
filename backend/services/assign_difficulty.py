@@ -18,7 +18,8 @@ def add_holds_img(image_path, holds_path, holds_img_path):
         dark_gray_img_3channel = dark_gray_img_3channel.astype(np.uint8)
         path = os.path.join(holds_path, f'{i}.npz')
         hold_img = sp.load_npz(path).toarray()
-        dark_gray_img_3channel = np.where(hold_img[:, :, None], image, dark_gray_img_3channel)
+        # dark_gray_img_3channel = np.where(hold_img[:, :, None], image, dark_gray_img_3channel)
+        dark_gray_img_3channel = np.where(hold_img[:, :, None], [0,0,255], dark_gray_img_3channel)
         # hold_img = hold_img.astype(np.uint8) * 255
         cv2.imwrite(os.path.join(holds_img_path, (str(i)+".jpg")), dark_gray_img_3channel)
 
@@ -48,10 +49,10 @@ def assign_difficulty(image_path, holds_path, holds_img_path, files_path):
 
 if __name__ == '__main__':
 
-    image_path = 'backend/services/files/860.jpg'
-    holds_path = f'backend/services/result6/holds'
-    holds_img_path = f'backend/services/result6/holds_img'
-    files_path = f'backend/services/result6'
+    image_path = 'backend/services/files/IMG_7872.jpg'
+    holds_path = f'backend/services/result8/holds'
+    holds_img_path = f'backend/services/result8/holds_img'
+    files_path = f'backend/services/result8'
 
     # i = int(input("Enter hold id: "))
     # assign_difficulty(image_path, holds_path, holds_img_path, files_path, i)

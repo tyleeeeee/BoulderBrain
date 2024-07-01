@@ -342,7 +342,7 @@ def filter_routes_by_hold_overlap(holds_dict, overlap_threshold, wall, route_dif
         if not holds1: continue
 
         # Skip routes that don't have a hold near the top wall.
-        if max([hold[1] for hold in holds1]) < 0.9 * wall.height: continue
+        if max([hold[1] for hold in holds1]) < 0.6 * wall.height: continue
 
         is_valid = True
         for route2, holds2 in valid_routes.items():
