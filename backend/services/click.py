@@ -1,29 +1,29 @@
 import cv2
 
-# # img = cv2.imread('holds.jpg')
-# img = cv2.imread('services/files/wall0604.jpg')
+# img = cv2.imread('holds.jpg')
+img = cv2.imread('files/wall11b.jpg')
 
-# ls = []
-# # click event and return x, y coordinates
-# def click_event(event, x, y, flags, param):
+ls = []
+# click event and return x, y coordinates
+def click_event(event, x, y, flags, param):
     
-#     if event == cv2.EVENT_LBUTTONDOWN:
-#         ls.append((x, y))
-#         # print(x, y)
-#         font = cv2.FONT_HERSHEY_SIMPLEX
-#         cv2.putText(img, f'({x}, {y})', (x, y), font, 1, (255, 0, 0), 2)
-#         cv2.imshow('image', img)
+    if event == cv2.EVENT_LBUTTONDOWN:
+        ls.append((x, y))
+        # print(x, y)
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        cv2.putText(img, f'({x}, {y})', (x, y), font, 1, (255, 0, 0), 2)
+        cv2.imshow('image', img)
         
-# cv2.imshow('image', img)
-# cv2.setMouseCallback('image', click_event)
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
+cv2.imshow('image', img)
+cv2.setMouseCallback('image', click_event)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 
-# print(ls)
+print(ls)
 
-img = cv2.imread('services/files/wall0604.jpg')
-img = img[0:935, 150:]
-cv2.imwrite('services/files/0604.jpg', img)
+# img = cv2.imread('files/wall11.jpg')
+# img = img[0:935, 150:]
+# cv2.imwrite('files/wall11b.jpg', img)
 
 # 5
 # (174, 90)
