@@ -30,10 +30,10 @@ def api_generate_routes():
 
         # Initialize Wall and Climber
         # image_path = 'services/files/example_wall.jpg'
-        image_path = 'services/files/wall10.jpg'
+        image_path = 'services/files/example_wall.jpg'
         print("Loading wall and climber details...")
 
-        wall = Wall(id=10, height=350, width=200, image_path=image_path) #made it quite larger on purpose
+        wall = Wall(id=0, height=350, width=500, image_path=image_path) #made it larger on purpose
         climber = Climber(wall, height=160, upper_arm_length=25, forearm_length=20,
                           upper_leg_length=40, lower_leg_length=40, torso_height=40,
                           torso_width=30)
@@ -44,16 +44,27 @@ def api_generate_routes():
         files_path = f'services/result{wall.id}'
         wall.holds,holds_map = get_holds_main(wall, image_path, holds_path, files_path)
 
+        direction = input("Enter 'v' to generate vertical routes, and 'h' to generate horizontal routes: ")
+
+
+        # If the climber is going horizontally, they can reach further, so let's stretch their limbs out.
+        horizontalBoostFactor = 2
+
+        if direction == 'h':
+            climber.upper_arm_length *= horizontalBoostFactor
+            climber.forearm_length *= horizontalBoostFactor
+            climber.lower_leg_length *= horizontalBoostFactor
+            climber.upper_leg_length *= horizontalBoostFactor
 
         print("Generating routes...")
-        routes = generateRoutes(wall, climber)
+        routes = generateRoutes(wall, climber, direction)
         holds_dict, routes_description_dict, route_difficulties_dict = process_final_routes(routes)
     
         # overlap_threshold = 30  # TODO: adjust where? Frontend? Try again when tree grows longer
         overlap_threshold = int(input("Insert your maximum overlap threshold: "))
         # print("OT:", overlap_threshold )
         print("Getting valid routes...")
-        valid_routes, valid_difficulties = filter_routes_by_hold_overlap(holds_dict, overlap_threshold, wall, route_difficulties_dict)
+        valid_routes, valid_difficulties = filter_routes_by_hold_overlap(holds_dict, overlap_threshold, wall, route_difficulties_dict, direction)
         # print("Valid Routes:", valid_routes)    
         # Convert set to list to make it serializable
         valid_routes_list = list(valid_routes)
