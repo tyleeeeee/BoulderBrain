@@ -43,9 +43,8 @@ def selectNextMoves(climber, wall, current_position, direction):
   random.shuffle(limbs) # Shuffle the order we explore options for each limb.
 
   # For moving horizontally, prioritize exploring the leftmost limb, first.
-  print(direction)
   if direction == 'h': limbs.sort(key = lambda limb: getattr(current_position, limb)[0], reverse=False)
-  for limb in limbs: print(getattr(current_position, limb)[0])
+  # for limb in limbs: print(getattr(current_position, limb)[0])
 
   for limb in limbs:
 
@@ -134,7 +133,7 @@ def selectNextMoves(climber, wall, current_position, direction):
 
 def generateRoutes(wall, climber, direction):
     startPoint = 0
-    armSpan = (climber.upper_arm_length + climber.forearm_length) * 2 + climber.torso_width
+    armSpan = (climber.upper_arm_length + climber.forearm_length) + climber.torso_width
     startPoint += armSpan
 
     # finalPositions is an array of all final positions, one per generated route.
@@ -181,7 +180,7 @@ def generateRoutesRecursive(climber, wall, position, parentPosition, direction):
         position.climber = None
         return [position]
 
-    maxDepth = 60
+    maxDepth = 25
     # Max depth of the tree is 30 moves; if max depth is reached then declare the route finished.
     if position.timestep >= maxDepth:
         print("Max depth of the tree is", maxDepth, "moves, so the route is finished")

@@ -63,7 +63,8 @@ def calcMaxKneeAngle(hipAngle):
   return maxKnee
 
 def calc_max_hip_angle(kneeAngle):
-  maxHip = - (kneeAngle - 112.5) ** 3 / 6500 + 90
+  # Adjusting maxHip formula to limit maximum hip angle to 90 degrees, let's see if this makes better footholds.
+  maxHip = min(90, - (kneeAngle - 112.5) ** 3 / 6500 + 90)
   return maxHip
 
 def foot_check(hold_yMax, position, climber, limb):
@@ -78,10 +79,16 @@ def foot_check(hold_yMax, position, climber, limb):
   # or if it is too close to the hip (distance is less )
 
   if limb == 'left_foot': 
+    # Confirm the foothold is within one leg's length of the hip.
     if distance.euclidean(position.left_hip, hold_yMax) > max_reach: return False
+    # Confirm the foothold isn't too close to the hip.
     if distance.euclidean(position.left_hip, hold_yMax) < min_reach: return False
+    # Confirm the foothold is above where the foot is currently.
     if position.left_foot[1] - hold_yMax[1] >= 0: return False
+    # Confirm the foothold isn't cross-body.
     if hold_yMax[0] > position.right_hip[0]: return False
+    # Confirm the foothold isn't already hosting another foot.
+    if hold_yMax == position.right_foot: return False
 
     # If the hold passes the above tests, use trigonometry to determine the necessary knee angle,
     # and then determine if the knee and hip bends required to place a foot on the hold are anatomically possible.
@@ -92,10 +99,19 @@ def foot_check(hold_yMax, position, climber, limb):
     if hipAngle > maxHipAngle: return False
   
   if limb == 'right_foot':
+    # Confirm the foothold is within one leg's length of the hip.
     if distance.euclidean(position.right_hip, hold_yMax) > max_reach: return False
+    # Confirm the foothold isn't too close to the hip.
     if distance.euclidean(position.right_hip, hold_yMax) < min_reach: return False
+    # Confirm the foothold is above where the foot is currently.
     if position.right_foot[1] - hold_yMax[1] >= 0: return False
-    if hold_yMax[0] < position.left_hip[0]: return False
+    # Confirm the foothold isn't cross-body.
+    if hold_yMax[0] > position.left_hip[0]: return False
+    # Confirm the foothold isn't already hosting another foot.
+    if hold_yMax == position.right_foot: return False
+
+    # If the hold passes the above tests, use trigonometry to determine the necessary knee angle,
+    # and then determine if the knee and hip bends required to place a foot on the hold are anatomically possible.
 
     hipAngle = calc_hip_angle(hold_yMax, position.right_hip, position.right_shoulder, climber)
     kneeAngle = calc_knee_angle(hold_yMax, position.right_hip, climber)

@@ -1,3 +1,7 @@
+# Important!
+# Before running, enter the virtual environment by using .\.venv\Scripts\activate.
+# (Make sure you are at \Desktop\BoulderBrain first)
+
 from flask import Flask, jsonify
 from flask_cors import CORS
 # from services.image_processing_service import get_holds_from_image
@@ -29,11 +33,11 @@ def api_generate_routes():
     try:
 
         # Initialize Wall and Climber
-        # image_path = 'services/files/example_wall.jpg'
+        # image_path = 'services/files/example_wall.jpg' 
         image_path = 'services/files/example_wall.jpg'
         print("Loading wall and climber details...")
 
-        wall = Wall(id=0, height=350, width=500, image_path=image_path) #made it larger on purpose
+        wall = Wall(id=0, height=350, width=700, image_path=image_path) #made it larger on purpose
         climber = Climber(wall, height=160, upper_arm_length=25, forearm_length=20,
                           upper_leg_length=40, lower_leg_length=40, torso_height=40,
                           torso_width=30)
