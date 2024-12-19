@@ -1,6 +1,10 @@
-The backend code requires Segment Anything from **[Meta AI Research, FAIR](https://ai.facebook.com/research/)**, please install it first.
+# BoulderBrain
+
+BoulderBrain is an algorithm for generating indoor bouldering routes by reusing existing holds in new combinations, multiplying the routes available to climbers on a given wall by several fold. Begun as a project for National Taiwan University's Advanced Human Computer Interaction course. [Demo video here.](https://www.youtube.com/watch?v=pPqtAb81Xyc)
 
 ## SAM Installation
+
+The backend calls Segment Anything from **[Meta AI Research, FAIR](https://ai.facebook.com/research/)**; please install it first.
 
 The code requires `python>=3.8`, as well as `pytorch>=1.7` and `torchvision>=0.8`. Please follow the instructions [here](https://pytorch.org/get-started/locally/) to install both PyTorch and TorchVision dependencies. Installing both PyTorch and TorchVision with CUDA support is strongly recommended.
 
