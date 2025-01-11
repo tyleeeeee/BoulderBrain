@@ -154,7 +154,7 @@ def generateRoutes(wall, climber, direction):
         # Explore the full tree of generated routes with generateRoutesRecursive, and append it to the results.
         finalPositions = finalPositions + generateRoutesRecursive(climber, wall, initialPosition, None, direction)
 
-        startPoint += 0.5 * armSpan
+        startPoint += 0.3 * armSpan
 
     
 
@@ -345,7 +345,7 @@ def filter_routes_by_hold_overlap(holds_dict, overlap_threshold, wall, route_dif
         if not holds1 or len(holds1) < 7: continue
 
         # Skip routes that don't have a hold near the top wall, for vertical routes.
-        if direction == 'v' and max([hold[1] for hold in holds1]) < 0.9 * wall.height: continue
+        if direction == 'v' and max([hold[1] for hold in holds1]) < 0.7 * wall.height: continue
 
         is_valid = True
         for route2, holds2 in valid_routes.items():
